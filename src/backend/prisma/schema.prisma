@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model Dispositivo {
+  id          Int           @id @default(autoincrement())
+  mac         String
+  estufa      String
+  Medidas     Medidas[]
+  Notificacao Notificacao[]
+}
+
+model Medidas {
+  id            Int           @id @default(autoincrement())
+  dispositivo   Dispositivo   @relation(fields: [dispositivoId], references: [id])
+  dispositivoId Int
+  temperatura   Float
+  umidade       Float
+  datetime      DateTime
+  Notificacao   Notificacao[]
+}
+
+model Notificacao {
+  id            Int         @id @default(autoincrement())
+  dispositivo   Dispositivo @relation(fields: [dispositivoId], references: [id])
+  dispositivoId Int
+  gatilho       Medidas     @relation(fields: [gatilhoId], references: [id])
+  gatilhoId     Int
+  tipo          Int
+  status        Int
+}

@@ -4,25 +4,23 @@ import {
   IonFabButton,
   IonHeader,
   IonIcon,
+  IonImg,
   IonPage,
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
 import { add } from "ionicons/icons";
+import React from "react";
 import CardEstufa from "../components/CardEstufa";
 import ExploreContainer from "../components/ExploreContainer";
 import ListaCards from "../components/ListaCards";
 import "./Tab1.css";
 
 const listaItens = [
-  { nome: "ItemA", temperatura: 18.0, umidade: 80 },
-  { nome: "ItemB", temperatura: 20.0, umidade: 80 },
-  { nome: "ItemC", temperatura: 18.0, umidade: 80 },
-  { nome: "ItemD", temperatura: 18.0, umidade: 80 },
-  { nome: "ItemE", temperatura: 18.0, umidade: 80 },
-  { nome: "ItemE", temperatura: 18.0, umidade: 80 },
-  { nome: "ItemE", temperatura: 18.0, umidade: 80 },
-  { nome: "ItemE", temperatura: 18.0, umidade: 80 },
+  { nome: "Estufa 1", temperatura: 18.0, umidade: 80 },
+  { nome: "Estufa 2", temperatura: 20.0, umidade: 80 },
+  { nome: "Estufa 3", temperatura: 18.0, umidade: 80 },
+  { nome: "Estufa 4", temperatura: 18.0, umidade: 80 },
 ];
 
 const Tab1: React.FC = () => {
@@ -30,7 +28,9 @@ const Tab1: React.FC = () => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Gerdau Florestal</IonTitle>
+          {/* <IonImg className="logoWeb" src="./KeepGrowing.png" ></IonImg> */}
+          <IonImg className="logo" src="./KeepGrowing2.png" ></IonImg>
+
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>

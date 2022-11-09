@@ -7,7 +7,7 @@ const router = express.Router();
 // controller
 
 // GET requests
-router.get("/list", (request, response) => {
+router.get("/list/active", (request, response) => {
   response.send({ message: "hello world! - list" });
 });
 

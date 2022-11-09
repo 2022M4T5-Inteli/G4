@@ -13,7 +13,7 @@ datasource db {
 
 model Dispositivo {
   id          Int           @id @default(autoincrement())
-  mac         String
+  mac         String        @unique
   estufa      String
   Medidas     Medidas[]
   Notificacao Notificacao[]

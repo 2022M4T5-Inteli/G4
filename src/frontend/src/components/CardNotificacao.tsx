@@ -1,35 +1,47 @@
 import {
-    IonCard,
-    IonCardHeader,
-    IonCardTitle,
-    IonCardSubtitle,
-    IonCardContent,
-    IonText,
-  } from "@ionic/react";
-  import "./CardNotificacao.css";
-  
-  export interface CardEstufaInputs {
-    nome: string;
-    temperatura: number;
-    umidade: number;
-  }
-  
-  const CardEstufa: React.FC<CardEstufaInputs> = ({
-    nome,
-    temperatura,
-    umidade,
-  }) => {
-    return (
-      <IonCard>
-        <IonCardContent className="card-container">
-          <IonText className="card-name">{nome}</IonText>
-          <div className="metrics-div">
-            <IonText className="metrics-title">{temperatura}°C</IonText>
-            <IonText className="metrics-title">{umidade}%</IonText>
-          </div>
-        </IonCardContent>
-      </IonCard>
-    );
-  };
-  
-  export default CardNotificacao;
+  IonCard,
+  IonCardHeader,
+  IonCardTitle,
+  IonCardSubtitle,
+  IonCardContent,
+  IonText,
+  IonButton,
+  IonIcon,
+} from "@ionic/react";
+import React from "react";
+import { check-outline } from 'ionicons/icons';
+import "./CardNotificacao.css";
+
+export interface CardNotificacaoInputs {
+  nome: string;
+  temperatura: number;
+  umidade: number;
+  aviso: string;
+}
+
+const CardNotificacao: React.FC<CardNotificacaoInputs> = ({
+  nome,
+  temperatura,
+  umidade,
+  aviso,
+}) => {
+  return (
+    <IonCard>
+      <IonCardContent className="container-card">
+        <div className="header-div">
+          <IonText className="name-card">{nome}</IonText>
+          <IonText className="name-card">{temperatura}°C  {umidade}%</IonText>
+        </div>
+        <div className="aviso-div">
+          <IonText className="aviso-text">{aviso}</IonText>
+        </div>
+        <div className="botao-div">
+          <IonButton className="botao-nao"></IonButton>
+          <IonButton className="botao-sim"></IonButton>
+        </div>
+      </IonCardContent>
+    </IonCard>
+  );
+};
+
+export default CardNotificacao;

@@ -16,6 +16,7 @@ import ExploreContainer from "../components/ExploreContainer";
 import ListaCards from "../components/ListaCards";
 import "./Tab1.css";
 
+
 const listaItens = [
   { nome: "Estufa 1", temperatura: 18.0, umidade: 80 },
   { nome: "Estufa 2", temperatura: 20.0, umidade: 80 },
@@ -41,6 +42,7 @@ const Tab1: React.FC = () => {
           slot="fixed"
           className="floating-add-button"
         >
+          
           <IonFabButton>
             <IonIcon icon={add} />
           </IonFabButton>

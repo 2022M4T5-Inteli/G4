@@ -4,7 +4,8 @@
     justify-content: space-between;
     align-items: center;
 }
-
-
-
-  
+.botao-modal{
+    --background: #298350;
+}
+.alert{
+    --background:#298350;}

@@ -6,6 +6,7 @@ import React, { useState, useRef } from 'react';
 import { OverlayEventDetail } from '@ionic/core/components';
 import { close } from "ionicons/icons";
 
+
 function Example() {
   const modal = useRef<HTMLIonModalElement>(null);
   const input = useRef<HTMLIonInputElement>(null);
@@ -28,17 +29,17 @@ function Example() {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Inline Modal</IonTitle>
+          <IonTitle>Status da Estufa 1</IonTitle>
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
-        <IonButton id="open-modal" expand="block">
-          Open
+        <IonButton className="botao-modal" id="open-modal" expand="block">
+          Status
         </IonButton>
         <p>{message}</p>
         <IonModal ref={modal} trigger="open-modal" onWillDismiss={(ev) => onWillDismiss(ev)}>
           <IonHeader>
-            <IonToolbar>
+            <IonToolbar className='alert'>
               <IonButtons slot="start">
                 <IonButton onClick={() => modal.current?.dismiss()}><IonIcon icon={close}/></IonButton>
               </IonButtons>
@@ -50,19 +51,29 @@ function Example() {
   </IonButtons> */}
             </IonToolbar>
           </IonHeader>
-          <IonContent className="ion-padding">
+          <IonContent className="alert">
             <IonTitle>STATUS</IonTitle>
                 <div className="flex-container">
-                    <div className="flex-child status">
-                        <IonText>Laterais</IonText>
-                        <IonText>Zenitais</IonText>
+                    <div className="windows">
+                        <p><IonText>Laterais</IonText></p>
+                        <p><IonText>Zenitais</IonText></p>
                     </div>
                     <div className="flex-child metricas">
-                        <IonText>100%</IonText>
-                        <IonText>30%</IonText>
+                        <p><IonText>100%</IonText></p>
+                        <p><IonText>30%</IonText></p>
                     </div>
                 </div>
             <IonTitle>HISTÓRICO</IonTitle>
+            <div className="flex-container">
+                    <div className="flex-child status">
+                        <p><IonText>11:30</IonText></p>
+                        <p><IonText>11:00</IonText></p>
+                    </div>
+                    <div className="flex-child metricas">
+                        <p><IonText>Zenitais: 10%</IonText></p>
+                        <p><IonText>Laterais: 30%</IonText></p>
+                    </div>
+                </div>
           </IonContent>
         </IonModal>
       </IonContent>

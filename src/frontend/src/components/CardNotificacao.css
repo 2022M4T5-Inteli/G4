@@ -1,0 +1,35 @@
+.container-card {
+    display: flex;
+    background-color: white;
+    padding: 15px;
+    color: black;
+    flex-direction: column;
+    align-items: center;
+}
+
+.header-div {
+    background-color: #298350;
+    color: white;
+    padding: 15px;
+    display: flex;
+    min-width: 100%;
+    border-radius: 10px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.aviso-div {
+    padding: 20px;
+}
+
+.botao-sim {
+    --background: #00A6111A;
+    --border-style: solid;
+    --border-color: #00A611;
+}
+
+.botao-nao {
+    --background: #A80D0D1A;
+    --border-style: solid;
+    --border-color: #A80D0D;
+}

@@ -20,7 +20,7 @@ const CardEstufa: React.FC<CardEstufaInputs> = ({
   umidade,
 }) => {
   return (
-    <IonCard>
+    <IonCard className="card-wrapper">
       <IonCardContent className="card-container">
         <IonText className="card-name">{nome}</IonText>
         <div className="metrics-div">

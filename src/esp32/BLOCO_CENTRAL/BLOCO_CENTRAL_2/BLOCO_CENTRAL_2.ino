@@ -7,7 +7,13 @@ LiquidCrystal_I2C para o display LCD
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <Adafruit_AHTX0.h>
+#include <WiFi.h>
 
+//definindo constantes para conexão com wi-fi:
+const char* ssid = "Inteli-COLLEGE";
+const char* password = "QazWsx@123";
+int LED = 8;
+WiFiServer server(80);
 
 //#include <Adafruit_BusIO_Register.h>
 //definindo as saídas de cada componente da solução VER SE ESSA PARTE TA CERTA DEFINIR MELHORS
@@ -29,6 +35,7 @@ LiquidCrystal_I2C lcd(0x27, lcdColumns, lcdRows);
 
 
 void setup(){
+  Serial.begin(115200);
   //setup dos leds
   pinMode(RED_RGB, OUTPUT);
   pinMode(GREEN_RGB, OUTPUT);
@@ -46,6 +53,22 @@ void setup(){
   lcd.init();
   //ligando a luz do LCD                      
   lcd.backlight();
+
+  //conexão com wifi:
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+    break;
+  }
+
+  Serial.println("");
+  Serial.println("WiFi conectada.");
+  Serial.println("Endereço de IP: ");
+  Serial.println(WiFi.localIP());
+
+  server.begin();
+  delay(500);
 }
 
 void loop(){
@@ -53,14 +76,41 @@ void loop(){
 sensors_event_t humidity, temp;
 aht.getEvent(&humidity, &temp);
   lcd.setCursor(0, 0);
+
+  //variaveis que guardam valores captados pelo sensor
+  float umidade = humidity.relative_humidity;
+  float temperatura = temp.temperature;
+
   // definindo a mensagem que vai passar
-  lcd.print("Umidade: " + String(humidity.relative_humidity));
+  lcd.print("Umidade: " + String(umidade));
   
   delay(500);
  
   //definindo as informações que vão passar na segunda linha do LCD
   lcd.setCursor(0,1);
-  lcd.print("Temperatura: " + String(temp.temperature));
+  lcd.print("Temperatura: " + String(temperatura));
+
+  //passando valores via wifi
+  //web(temperatura, umidade);
+  WiFiClient client = server.available();
+  if (client) {
+    Serial.println("New Client.");
+    String currentLine = "";
+    //while (client.connected()) {
+   if (client.available()) {
+      char c = client.read();
+      Serial.write(c);
+
+      client.println("HTTP/1.1 200 OK"); 
+      client.println("Content-type:text/html");
+      client.println();
+      client.print("tempretura atual:"+String(temperatura));
+      client.print("umidade atual:" + String(umidade));
+      client.println();  
+      }
+  }
+
+  delay(500);
 
   //definindo se caso a temperatura não esteja entre o intervalo que a estufa precise ligue o led vermelho, caso esteja dentro das condiçoes vai ligar o led verde.
   if (28 <= temp.temperature && temp.temperature <= 36) {

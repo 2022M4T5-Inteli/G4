@@ -31,8 +31,8 @@ router.post("/add", async (request, response) => {
     data: {
     dispositivoId: dispositivoId,
     temperatura: medidasTemperatura,
-    umidade: medidasUmidade,
-    datetime: Datetime,
+    umidade: medidasUmidade, 
+    datetime: medidasDatetime,
 
     },
   });
@@ -44,41 +44,6 @@ router.post("/add", async (request, response) => {
     data: medidas,
     error: false,
   });
-});
-
-router.post("/edit", async (request, response) => {
-  const dispositivoId = request.body.id;
-  const medidasName = request.body.nome;
-
-  // checks if the current mac exists on the database
-  const medidasExists = await prisma.medidas.findUnique({
-    where: {
-      id: dispositivoId,
-    },
-  });
-
-  // Returns an error if the medidas already exists
-  if (medidasExists) {
-    // updates the medidas by id
-    const updateMedidas = await prisma.medidas.update({
-      where: {
-        id: dispositivoId,
-      },
-      data: {
-        estufa: medidasName,
-      },
-    });
-
-    response.statusCode = 200;
-    return response.json({
-      message: "Medidas editada com sucesso",
-      data: updateMedidas,
-      error: false,
-    });
-  }
-
-  response.statusCode = 500;
-  return response.json({ message: "Erro ao editar medidas", error: true });
 });
 
 module.exports = router;

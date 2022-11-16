@@ -26,15 +26,17 @@ router.get("/list/active", async (request, response) => {
 
 // POST requests
 router.post("/add", async (request, response) => {
-  const dispositivoId = request.body.id;
+  const notificacaoDispositivoId = request.body.id;
   const notificacaoStatus = request.body.status;
   const notificacaoTipo = request.body.tipo;
+  const notificacaoGatilho = request.body.gatilho;
 
   // creates the medida
   const notificacoes = await prisma.notificacao.create({
     data: {
-    dispositivoId: dispositivoId,
+    dispositivoId: notificacaoDispositivoId,
     status: notificacaoStatus,
+    gatilhoId:notificacaoGatilho,
     tipo: notificacaoTipo,
     },
   });
@@ -52,13 +54,13 @@ router.post("/add", async (request, response) => {
 
 router.post("/status", async (request, response) => {
   //response.send({ message: "hello world! - status" });
-  const dispositivoId = request.body.id;
-  const notificacaoName = request.body.nome;
+  const notificacaoId = request.body.id;
+  const notificacaoName = request.body.status;
 
   // checks if the current mac exists on the database
   const notificacaoExists = await prisma.notificacao.findUnique({
     where: {
-      id: dispositivoId,
+      id: notificacaoId,
     },
   });
 
@@ -67,10 +69,10 @@ router.post("/status", async (request, response) => {
     // updates the medidas by id
     const updateNotificacoes = await prisma.notificacao.update({
       where: {
-        id: dispositivoId,
+        id: notificacaoId,
       },
       data: {
-        notificacao: notificacaoName,
+        status: notificacaoName,
       },
     });
 

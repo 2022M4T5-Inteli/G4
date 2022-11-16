@@ -8,11 +8,13 @@ LiquidCrystal_I2C para o display LCD
 #include <LiquidCrystal_I2C.h>
 #include <Adafruit_AHTX0.h>
 #include <WiFi.h>
+#include <HTTPClient.h>
 
-//definindo constantes para conexão com wi-fi:
+//definindo constantes para conexão com wi-fi e db:
 const char* ssid = "Inteli-COLLEGE";
 const char* password = "QazWsx@123";
 int LED = 8;
+const char* serverName = "http://10.128.64.132:1234/medidas/add";
 WiFiServer server(80);
 
 //#include <Adafruit_BusIO_Register.h>
@@ -32,6 +34,10 @@ int lcdColumns = 16;
 int lcdRows = 2;
 //definindo o endereço do LCD
 LiquidCrystal_I2C lcd(0x27, lcdColumns, lcdRows);  
+
+//variaveis longas para guardadar tempo:
+unsigned long lastTime = 0;
+unsigned long timerDelay = 60000;
 
 
 void setup(){
@@ -91,16 +97,40 @@ aht.getEvent(&humidity, &temp);
   lcd.print("Temperatura: " + String(temperatura));
 
   //passando valores via wifi
-  //web(temperatura, umidade);
-  WiFiClient client = server.available();
-  if (client) {
+  if ((millis() - lastTime) > timerDelay){
+    //verifica status da conexão
+    if(WiFi.status()==WL_CONNECTED){
+
+      WiFiClient client;
+      HTTPClient http;
+
+      //caminho do servidor
+      http.begin(client, serverName);
+
+      //enviando JSON
+      http.addHeader("Content-Type", "application/json");
+      int httpResponseCode = http.POST("{\"dispositivoId\": \"1\", \"temperatura\":"+ String(temperatura) +",\"umidade\":"+ String(umidade) + ",\"datetime\": \"2022-01-20T12:01:30.543Z\"}");
+
+      Serial.print("HTTP Response code: ");
+      Serial.println(httpResponseCode);
+      delay(100);  
+
+      //termina request
+      http.end();
+
+    }
+    else{
+      Serial.println("WiFi Disconnected");
+    }
+    lastTime = millis();
+  }
+  /*if (client) {
     Serial.println("New Client.");
     String currentLine = "";
     //while (client.connected()) {
    if (client.available()) {
       char c = client.read();
       Serial.write(c);
-
       client.println("HTTP/1.1 200 OK"); 
       client.println("Content-type:text/html");
       client.println();
@@ -108,8 +138,8 @@ aht.getEvent(&humidity, &temp);
       client.print("umidade atual:" + String(umidade));
       client.println();  
       }
-  }
-
+  }*/
+  
   delay(500);
 
   //definindo se caso a temperatura não esteja entre o intervalo que a estufa precise ligue o led vermelho, caso esteja dentro das condiçoes vai ligar o led verde.

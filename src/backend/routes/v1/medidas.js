@@ -19,6 +19,18 @@ router.get("/list", async (request, response) => {
   return response.json(responseObj);
 });
 
+router.get("/list/dispositivo/:id", async (request, response) => {
+  // returns the medidas from a dispositivo that are in the database
+  const idDispositivo = Number(request.params.id);
+  const medidas = await prisma.medidas.findMany({
+    where: {
+      dispositivoId: idDispositivo,
+    },
+  });
+  const responseObj = { data: medidas, error: false };
+  return response.json(responseObj);
+});
+
 // POST requests
 router.post("/add", async (request, response) => {
   const dispositivoId = request.body.id;

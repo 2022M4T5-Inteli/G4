@@ -1,0 +1,13 @@
+.logo {
+  padding: 1.2em;
+  height: 7em;
+  width: 200px;
+  margin-right: 0px;
+}
+
+ion-badge {
+  position: absolute;
+  top: -0.2rem;
+  right: -0.2rem;
+  opacity: 0.9;
+}

@@ -16,8 +16,21 @@ const router = express.Router();
 router.get("/list/active", async (request, response) => {
   const notificacoes = await prisma.notificacao.findMany({
     where: {
-      status: 0
-    }
+      status: 0,
+    },
+    include: {
+      dispositivo: {
+        select: {
+          estufa: true,
+        },
+      },
+      gatilho: {
+        select: {
+          temperatura: true,
+          umidade: true,
+        },
+      },
+    },
   });
   const responseObj = { data: notificacoes, error: false };
   return response.json(responseObj);
@@ -34,10 +47,10 @@ router.post("/add", async (request, response) => {
   // creates the medida
   const notificacoes = await prisma.notificacao.create({
     data: {
-    dispositivoId: notificacaoDispositivoId,
-    status: notificacaoStatus,
-    gatilhoId:notificacaoGatilho,
-    tipo: notificacaoTipo,
+      dispositivoId: notificacaoDispositivoId,
+      status: notificacaoStatus,
+      gatilhoId: notificacaoGatilho,
+      tipo: notificacaoTipo,
     },
   });
 
@@ -48,9 +61,7 @@ router.post("/add", async (request, response) => {
     data: notificacoes,
     error: false,
   });
-
 });
-
 
 router.post("/status", async (request, response) => {
   //response.send({ message: "hello world! - status" });

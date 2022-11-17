@@ -3,9 +3,10 @@ const bodyParser = require("body-parser");
 const urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 // Server configuration
+const cors = require("cors");
 const app = express();
 
-const HOSTNAME = "127.0.0.1";
+const HOSTNAME = "0.0.0.0";
 const PORT = 1234;
 
 // routers import
@@ -16,6 +17,7 @@ const notificacaoRoute = require("./routes/v1/notificacao");
 
 // application middleware
 
+app.use(cors());
 app.use(express.json());
 
 // application paths

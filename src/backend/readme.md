@@ -14,6 +14,16 @@ Designed as part of an IOT solution
 
 4. Run: `npm install`
 
+5. Run `npx prisma generate` for connecting to the database
+
+## **Environment variables**
+
+1. Copy `.env.template` to `.env`
+
+2. In the new file, replace all values accordingly
+
+3. Save (for security reasons, you should not commit the final file)
+
 ## **Running**
 
 1. For development run: `npm run dev`
@@ -23,15 +33,6 @@ Designed as part of an IOT solution
 ## **Database migration**
 
 1. For migrating model and schema changes, run `npm run migrate`
-
-
-## **Environment variables**
-
-1. Copy `.env.template` to `.env`
-
-2. In the new file, replace all values accordingly
-
-3. Save (for security reasons, you should not commit the final file)
 
 ## **How to Contribute**
 

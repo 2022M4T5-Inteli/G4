@@ -33,7 +33,7 @@ router.get("/list/dispositivo/:id", async (request, response) => {
 
 // POST requests
 router.post("/add", async (request, response) => {
-  const dispositivoId = request.body.id;
+  const dispositivoId = Number(request.body.dispositivoId);
   const medidasTemperatura = request.body.temperatura;
   const medidasUmidade = request.body.umidade;
   const medidasDatetime = request.body.datetime;
@@ -41,11 +41,10 @@ router.post("/add", async (request, response) => {
   // creates the medida
   const medidas = await prisma.medidas.create({
     data: {
-    dispositivoId: dispositivoId,
-    temperatura: medidasTemperatura,
-    umidade: medidasUmidade, 
-    datetime: medidasDatetime,
-
+      dispositivoId: dispositivoId,
+      temperatura: medidasTemperatura,
+      umidade: medidasUmidade,
+      datetime: medidasDatetime,
     },
   });
 

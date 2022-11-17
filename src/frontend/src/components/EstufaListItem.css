@@ -1,8 +1,10 @@
 .card-container {
-  padding: 1.8em;
+  padding: 2em;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background-color: #298350;
+  color: white;
 }
 
 .card-name {

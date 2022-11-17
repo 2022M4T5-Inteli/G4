@@ -1,5 +1,5 @@
 {
-  "name": "myApp",
+  "name": "keepgrowing-neo",
   "version": "0.0.1",
   "private": true,
   "dependencies": {
@@ -19,11 +19,16 @@
     "@types/react-dom": "^18.0.6",
     "@types/react-router": "^5.1.11",
     "@types/react-router-dom": "^5.1.7",
-    "ionicons": "^6.0.3",
+    "axios": "^1.1.3",
+    "chart.js": "^4.0.1",
+    "history": "^4.9.0",
+    "ionicons": "^6.0.4",
     "react": "^18.2.0",
+    "react-chartjs-2": "^4.3.1",
     "react-dom": "^18.2.0",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
+    "react-scripts": "^5.0.0",
     "typescript": "^4.1.3",
     "web-vitals": "^0.2.4",
     "workbox-background-sync": "^5.1.4",
@@ -64,8 +69,7 @@
     ]
   },
   "devDependencies": {
-    "@capacitor/cli": "4.4.0",
-    "react-scripts": "5.0.1"
+    "@capacitor/cli": "4.4.0"
   },
   "description": "An Ionic project"
 }

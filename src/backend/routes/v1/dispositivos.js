@@ -17,6 +17,22 @@ router.get("/list", async (request, response) => {
   return response.json(responseObj);
 });
 
+router.get("/list/detailed", async (request, response) => {
+  // returns all the dispositivos that are in the database
+  const dispositivos = await prisma.dispositivo.findMany({
+    include: {
+      Medidas: {
+        orderBy: {
+          id: "desc",
+        },
+        take: 1,
+      },
+    },
+  });
+  const responseObj = { data: dispositivos, error: false };
+  return response.json(responseObj);
+});
+
 // [POST] requests
 
 router.post("/add", async (request, response) => {

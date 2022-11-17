@@ -19,42 +19,17 @@ router.get("/list", async (request, response) => {
   return response.json(responseObj);
 });
 
-router.get(
-  "/graph/:idDispositivo/:rangeInMinutes",
-  async (request, response) => {
-    // returns all th e medidas that are in the database
-    const dispositivoId = Number(request.params.idDispositivo);
-    const minuteRange = Number(request.params.rangeInMinutes);
-    const labels = [];
-    const temperatureMedians = [];
-    const humidityMedians = [];
-
-    let maxCount = 0;
-
-    const medidas = await prisma.medidas.findMany({
-      take: minuteRange,
-      where: {
-        dispositivoId: dispositivoId,
-      },
-    });
-
-    maxCount = Math.ceil(medidas.length / 5);
-
-    // push the time labels
-    for (let i = 1; i < maxCount + 1; i++) {
-      labels.push(i * 5);
-    }
-
-    let auxCount = 0;
-    let currentMedian = 0;
-    for (let i = 0; i < medidas.length; i++) {
-      
-    }
-
-    const responseObj = { data: medidas, error: false };
-    return response.json(responseObj);
-  }
-);
+router.get("/list/dispositivo/:id", async (request, response) => {
+  // returns the medidas from a dispositivo that are in the database
+  const idDispositivo = Number(request.params.id);
+  const medidas = await prisma.medidas.findMany({
+    where: {
+      dispositivoId: idDispositivo,
+    },
+  });
+  const responseObj = { data: medidas, error: false };
+  return response.json(responseObj);
+});
 
 // POST requests
 router.post("/add", async (request, response) => {

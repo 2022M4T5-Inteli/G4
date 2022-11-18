@@ -30,7 +30,7 @@ const Home: React.FC = () => {
   const [dispositivos, setDispositivo] = useState<IDispositivoDetailed[]>([]);
   const [notificacoes, setNotificacoes] = useState<INotificacao[]>([]);
 
-  useIonViewWillEnter(async () => {
+  const refresh = async () => {
     const dsp = await listDispositivosDetailed();
 
     const ntfcs = await listNotificacoesPendentes();
@@ -38,7 +38,12 @@ const Home: React.FC = () => {
     setEstufas(msgs);
     setDispositivo(dsp.data);
     setNotificacoes(ntfcs.data);
-    console.log(dsp);
+    // automatically refresh every 15 seconds
+    setTimeout(refresh, 15000);
+  };
+
+  useIonViewWillEnter(async () => {
+    await refresh();
   });
 
   function datetimeToTime(datetime: string) {
@@ -66,14 +71,8 @@ const Home: React.FC = () => {
     return time;
   }
 
-  const refresh = async (e: CustomEvent) => {
-    const dsp = await listDispositivosDetailed();
-
-    const ntfcs = await listNotificacoesPendentes();
-    const msgs = getEstufas();
-    setEstufas(msgs);
-    setDispositivo(dsp.data);
-    setNotificacoes(ntfcs.data);
+  const refreshHandler = async (e: CustomEvent) => {
+    await refresh();
     e.detail.complete();
   };
 
@@ -98,7 +97,7 @@ const Home: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
-        <IonRefresher slot="fixed" onIonRefresh={refresh}>
+        <IonRefresher slot="fixed" onIonRefresh={refreshHandler}>
           <IonRefresherContent></IonRefresherContent>
         </IonRefresher>
 

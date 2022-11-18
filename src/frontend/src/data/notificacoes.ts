@@ -26,6 +26,12 @@ export interface INotificacao {
   };
 }
 
+export interface IStatusResponse {
+  message: string;
+  data: INotificacao;
+  error: boolean;
+}
+
 export interface INotificacaoResponse {
   data: INotificacao[];
 }
@@ -35,4 +41,19 @@ export async function listNotificacoesPendentes() {
     `${API.NOTIFICACOES_ENDPOINT}/list/active`
   );
   return data.data;
+}
+
+export async function updateNotificacaoStatus(
+  notificacaoId: number,
+  status: number
+) {
+  const response = await axios.post<IStatusResponse>(
+    `${API.NOTIFICACOES_ENDPOINT}/status`,
+    {
+      id: notificacaoId,
+      status,
+    }
+  );
+
+  return response.data;
 }

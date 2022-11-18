@@ -19,6 +19,7 @@ export interface CardNotificacaoInputs {
   temperatura: number;
   umidade: number;
   aviso: string;
+  onclickHandler: () => void;
 }
 
 const CardNotificacao: React.FC<CardNotificacaoInputs> = ({
@@ -26,6 +27,7 @@ const CardNotificacao: React.FC<CardNotificacaoInputs> = ({
   temperatura,
   umidade,
   aviso,
+  onclickHandler,
 }) => {
   return (
     <IonCard>
@@ -40,11 +42,13 @@ const CardNotificacao: React.FC<CardNotificacaoInputs> = ({
           <IonText className="aviso-text">{aviso}</IonText>
         </div>
         <div className="botao-div">
-          <IonButton className="botao-nao">
-            <IonIcon icon={close} color={"light"}/>
-          </IonButton>
-          <IonButton className="botao-sim">
-            <IonIcon icon={checkmark} color={"light"}/>
+          <IonButton
+            onClick={() => {
+              onclickHandler();
+            }}
+          >
+            Dispensar
+            <IonIcon icon={checkmark} color={"light"} />
           </IonButton>
         </div>
       </IonCardContent>

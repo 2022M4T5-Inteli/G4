@@ -34,6 +34,7 @@ import {
   INotificacao,
   listNotificacoesPendentes,
   notificationStatusMap,
+  updateNotificacaoStatus,
 } from "../data/notificacoes";
 
 function ViewNotifications() {
@@ -49,11 +50,25 @@ function ViewNotifications() {
     setNotificacoes(ntfcs.data);
   });
 
-  const refresh = (e: CustomEvent) => {
-    setTimeout(() => {
-      e.detail.complete();
-    }, 3000);
+  const refresh = async (e: CustomEvent) => {
+    const ntfcs = await listNotificacoesPendentes();
+    const msgs = getEstufas();
+    setEstufas(msgs);
+    setNotificacoes(ntfcs.data);
+    e.detail.complete();
   };
+
+  async function onNotificationDismissHandler(notificationId: number) {
+    const dismissedNotification = await updateNotificacaoStatus(
+      notificationId,
+      1
+    );
+    const ntfcs = await listNotificacoesPendentes();
+    const msgs = getEstufas();
+    setEstufas(msgs);
+    setNotificacoes(ntfcs.data);
+    console.log(dismissedNotification);
+  }
 
   const modal = useRef<HTMLIonModalElement>(null);
 
@@ -83,6 +98,9 @@ function ViewNotifications() {
               temperatura={n.gatilho.temperatura}
               umidade={n.gatilho.umidade}
               aviso={notificationStatusMap[n.tipo]}
+              onclickHandler={() => {
+                return onNotificationDismissHandler(n.id);
+              }}
             />
           ))}
         </IonList>

@@ -13,6 +13,7 @@ interface MessageListItemProps {
   temperature: number;
   humidity: number;
   id: string | number;
+  time: string;
 }
 
 const EstufaListItem: React.FC<MessageListItemProps> = ({
@@ -20,12 +21,16 @@ const EstufaListItem: React.FC<MessageListItemProps> = ({
   temperature,
   humidity,
   id,
+  time,
 }) => {
   return (
     <IonCard routerLink={`/estufa/${id}`}>
       <IonCardContent className="card-container">
-        <IonText className="card-name">{name}</IonText>
-        <div className="metrics-div">
+        <div className="metrics-div flex-start">
+          <IonText className="card-name">{name}</IonText>
+          <IonText className="card-subinfo">Atualizado às {time}</IonText>
+        </div>
+        <div className="metrics-div flex-end">
           <IonText className="card-name">{temperature}°C</IonText>
           <IonText className="card-name">{humidity}%</IonText>
         </div>

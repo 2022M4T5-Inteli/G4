@@ -1,3 +1,4 @@
+//importando os componentes do ionic
 import {
   IonCard,
   IonCardHeader,
@@ -9,11 +10,11 @@ import {
   IonIcon,
 } from "@ionic/react";
 import React from "react";
-
+//importando o css
 import "./CardNotificacao.css";
 
 import { checkmark, close } from "ionicons/icons";
-
+//exportando a interface
 export interface CardNotificacaoInputs {
   nome: string;
   temperatura: number;
@@ -21,7 +22,7 @@ export interface CardNotificacaoInputs {
   aviso: string;
   onclickHandler: () => void;
 }
-
+//definindo as constantes que essa pagina ira usar:
 const CardNotificacao: React.FC<CardNotificacaoInputs> = ({
   nome,
   temperatura,
@@ -30,7 +31,9 @@ const CardNotificacao: React.FC<CardNotificacaoInputs> = ({
   onclickHandler,
 }) => {
   return (
+    //criando o card de notificação
     <IonCard>
+      {/* criando o conteudo do card */}
       <IonCardContent className="container-card">
         <div className="header-div">
           <IonText className="name-card">{nome}</IonText>

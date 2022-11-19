@@ -1,3 +1,4 @@
+//importando os componentes do ionic
 import {
   IonCard,
   IonCardContent,
@@ -6,6 +7,7 @@ import {
   IonNote,
   IonText,
 } from "@ionic/react";
+//importando  css da pagina
 import "./StatusCard.css";
 
 interface StatusCardProps {

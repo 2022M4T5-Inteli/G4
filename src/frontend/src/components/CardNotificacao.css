@@ -1,3 +1,5 @@
+/* css dos cards de notificação */
+/* conteudo de dentro do card */
 .container-card {
     display: flex;
     background-color: white;
@@ -7,6 +9,7 @@
     align-items: center;
 }
 
+/* header do card */
 .header-div {
     background-color: #298350;
     color: white;
@@ -21,13 +24,13 @@
 .aviso-div {
     padding: 20px;
 }
-
+/* botão de confirmação */
 .botao-sim {
     --background: #00A6111A;
     --border-style: solid;
     --border-color: #00A611;
 }
-
+/* botão de negação */
 .botao-nao {
     --background: #A80D0D1A;
     --border-style: solid;

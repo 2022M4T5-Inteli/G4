@@ -1,28 +1,28 @@
-// Required for accessing the database
+// Para acessar o banco de dados
 const { PrismaClient, Prisma } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-// Required for route handling
+// Para o tratamento de rota
 const express = require("express");
 const { MetricValidator } = require("../../utils/metrics");
 const { Notificacao } = require("../../utils/notificacao");
 
-// Router Controllers
+// Controladores da rota
 
 const router = express.Router();
 
-// controller
+// criando os controladores
 
-// GET requests
+// requesição GET para a lista de medidas
 router.get("/list", async (request, response) => {
-  // returns all the medidas that are in the database
+  // retorna todas as medidas que estão no banco de dados
   const medidas = await prisma.medidas.findMany();
   const responseObj = { data: medidas, error: false };
   return response.json(responseObj);
 });
 
 router.get("/list/dispositivo/:id", async (request, response) => {
-  // returns the medidas from a dispositivo that are in the database
+  // retorna as medidas de um dispositivo escolhido pelo id(:id) que estão no banco de dados
   const idDispositivo = Number(request.params.id);
   const medidas = await prisma.medidas.findMany({
     where: {
@@ -33,14 +33,14 @@ router.get("/list/dispositivo/:id", async (request, response) => {
   return response.json(responseObj);
 });
 
-// POST requests
+// requesição POST para adicionar medidas
 router.post("/add", async (request, response) => {
   const dispositivoId = Number(request.body.dispositivoId);
   const medidasTemperatura = request.body.temperatura;
   const medidasUmidade = request.body.umidade;
   const medidasDatetime = request.body.datetime;
 
-  // creates the medida
+  // cria a medida
   const medidas = await prisma.medidas.create({
     data: {
       dispositivoId: dispositivoId,
@@ -61,7 +61,7 @@ router.post("/add", async (request, response) => {
     }
   });
 
-  // returns the newly created medidas
+  // retorna a medida criada
   response.statusCode = 200;
   return response.send({
     message: "Medidas Adicionadas com sucesso!",

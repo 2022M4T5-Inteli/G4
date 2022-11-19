@@ -4,6 +4,8 @@ const prisma = new PrismaClient();
 
 // Required for route handling
 const express = require("express");
+const { MetricValidator } = require("../../utils/metrics");
+const { Notificacao } = require("../../utils/notificacao");
 
 // Router Controllers
 
@@ -46,6 +48,17 @@ router.post("/add", async (request, response) => {
       umidade: medidasUmidade,
       datetime: medidasDatetime,
     },
+  });
+
+  const validator = new MetricValidator(medidasTemperatura, medidasUmidade);
+  const statusList = validator.verifyRules();
+
+  statusList.forEach(async (statusCode) => {
+    const notificacao = new Notificacao(dispositivoId, medidas.id, statusCode);
+    const createNotification = await notificacao.createNotification();
+    if (createNotification == true) {
+      console.log("Notificação Gerada!!");
+    }
   });
 
   // returns the newly created medidas

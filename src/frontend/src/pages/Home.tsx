@@ -30,7 +30,7 @@ const Home: React.FC = () => {
   const [dispositivos, setDispositivo] = useState<IDispositivoDetailed[]>([]);
   const [notificacoes, setNotificacoes] = useState<INotificacao[]>([]);
 
-  useIonViewWillEnter(async () => {
+  const refresh = async () => {
     const dsp = await listDispositivosDetailed();
 
     const ntfcs = await listNotificacoesPendentes();
@@ -38,13 +38,42 @@ const Home: React.FC = () => {
     setEstufas(msgs);
     setDispositivo(dsp.data);
     setNotificacoes(ntfcs.data);
-    console.log(dsp);
+    // automatically refresh every 15 seconds
+    setTimeout(refresh, 15000);
+  };
+
+  useIonViewWillEnter(async () => {
+    await refresh();
   });
 
-  const refresh = (e: CustomEvent) => {
-    setTimeout(() => {
-      e.detail.complete();
-    }, 3000);
+  function datetimeToTime(datetime: string) {
+    const dateConverted = new Date(datetime);
+    let hour = dateConverted.getUTCHours();
+    let minutes = dateConverted.getUTCMinutes();
+
+    let hourConverted = "";
+    let minutesConverted = "";
+
+    if (hour < 10) {
+      hourConverted = `0${hour}`;
+    } else {
+      hourConverted = String(hour);
+    }
+
+    if (minutes < 10) {
+      minutesConverted = `0${minutes}`;
+    } else {
+      minutesConverted = String(minutes);
+    }
+
+    const time = `${hourConverted}:${minutesConverted}`;
+
+    return time;
+  }
+
+  const refreshHandler = async (e: CustomEvent) => {
+    await refresh();
+    e.detail.complete();
   };
 
   return (
@@ -68,7 +97,7 @@ const Home: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent fullscreen>
-        <IonRefresher slot="fixed" onIonRefresh={refresh}>
+        <IonRefresher slot="fixed" onIonRefresh={refreshHandler}>
           <IonRefresherContent></IonRefresherContent>
         </IonRefresher>
 
@@ -80,6 +109,7 @@ const Home: React.FC = () => {
               name={d.estufa}
               temperature={d.Medidas[0].temperatura}
               humidity={d.Medidas[0].umidade}
+              time={datetimeToTime(d.Medidas[0].datetime)}
             />
           ))}
         </IonList>

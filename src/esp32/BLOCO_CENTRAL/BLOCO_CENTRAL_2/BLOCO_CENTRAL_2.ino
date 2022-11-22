@@ -3,6 +3,8 @@
 Adafruit_AHTX0 para o sensor de temperatura e umidade
 Wire que vai permitir enviar e receber dados por meio da interface I2C em uma rede de sensores
 LiquidCrystal_I2C para o display LCD
+WiFi essa biblioteca habilita a conexão de rede, tanto redes locais quanto internet, podendo intanciar Servidores, Clientes e enviar ou receber pacotes UDP por meio do WiFi
+HTTPClient essa biblioteca fornece uma API para as solicitações HTTP serem criadas e executadas a partir de seu modelo
 */
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
@@ -99,6 +101,7 @@ void setup(){
 
   Serial.println("");
   Serial.println("WiFi conectada.");
+  //print o endereço do IP
   Serial.println("Endereço de IP: ");
   Serial.println(WiFi.localIP());
 
@@ -128,6 +131,7 @@ aht.getEvent(&humidity, &temp);
   //passando valores via wifi
   if ((millis() - lastTime) > timerDelay){
     //verifica status da conexão
+    //caso o wifi esteja conectado:
     if(WiFi.status()==WL_CONNECTED){
 
       WiFiClientSecure client;
@@ -150,6 +154,7 @@ aht.getEvent(&humidity, &temp);
       http.end();
 
     }
+    //caso o wifi esteja desconectado
     else{
       Serial.println("WiFi Disconnected");
     }

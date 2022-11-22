@@ -6,8 +6,8 @@ const urlencodedParser = bodyParser.urlencoded({ extended: false });
 const cors = require("cors");
 const app = express();
 
-const HOSTNAME = "0.0.0.0";
-const PORT = 1234;
+const HOSTNAME = "127.0.0.1";
+const PORT = 3000;
 
 // routers import
 

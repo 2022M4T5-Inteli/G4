@@ -10,11 +10,40 @@ LiquidCrystal_I2C para o display LCD
 #include <WiFi.h>
 #include <HTTPClient.h>
 
+const char* root_ca = \
+"-----BEGIN CERTIFICATE-----\n" \
+"MIIETjCCAzagAwIBAgISA9otMSuMr7adH8i5RZ50JyWdMA0GCSqGSIb3DQEBCwUA\n" \
+"MDIxCzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MQswCQYDVQQD\n" \
+"EwJSMzAeFw0yMjA5MjQyMzI0MDRaFw0yMjEyMjMyMzI0MDNaMBQxEjAQBgNVBAMM\n" \
+"CSouZmx5LmRldjBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABEUhlkSYvdPtnf1J\n" \
+"w9WVCJ074p6S4LV4w6fcOHKeaUh0/y0zo2SAU3lXBxt988bEd/51bv6GIss2MNJI\n" \
+"rTTAsHmjggJFMIICQTAOBgNVHQ8BAf8EBAMCB4AwHQYDVR0lBBYwFAYIKwYBBQUH\n" \
+"AwEGCCsGAQUFBwMCMAwGA1UdEwEB/wQCMAAwHQYDVR0OBBYEFMt9kWuycE2DOhv2\n" \
+"JqWX5AvKHNOwMB8GA1UdIwQYMBaAFBQusxe3WFbLrlAJQOYfr52LFMLGMFUGCCsG\n" \
+"AQUFBwEBBEkwRzAhBggrBgEFBQcwAYYVaHR0cDovL3IzLm8ubGVuY3Iub3JnMCIG\n" \
+"CCsGAQUFBzAChhZodHRwOi8vcjMuaS5sZW5jci5vcmcvMBQGA1UdEQQNMAuCCSou\n" \
+"Zmx5LmRldjBMBgNVHSAERTBDMAgGBmeBDAECATA3BgsrBgEEAYLfEwEBATAoMCYG\n" \
+"CCsGAQUFBwIBFhpodHRwOi8vY3BzLmxldHNlbmNyeXB0Lm9yZzCCAQUGCisGAQQB\n" \
+"1nkCBAIEgfYEgfMA8QB2ACl5vvCeOTkh8FZzn2Old+W+V32cYAr4+U1dJlwlXceE\n" \
+"AAABg3IHmrEAAAQDAEcwRQIgRkZwKGLgAp/8z/F/o3WvT1AQzgwKG5CkkcCpbpi7\n" \
+"C6cCIQCkUDA8bqzTkyLEiXyaQjLkhpwVsFHk/RtuqV+/RDt18AB3AG9Tdqwx8DEZ\n" \
+"2JkApFEV/3cVHBHZAsEAKQaNsgiaN9kTAAABg3IHnAwAAAQDAEgwRgIhALZECaLj\n" \
+"tKpW13i1APgtlbYY6i2DdG5ZCpzIpDywptcFAiEAzOk8xeZeXk9bOmMgyQDjehg8\n" \
+"0wDCxh6wIlNoIaLwDW8wDQYJKoZIhvcNAQELBQADggEBAEdmPvIgbkMGv+gEDMQ6\n" \
+"X5MFdrSKcWp/o+1Xhx1AThhiyZbq908OesJCP8Re49X9QvnJ9s3ArqUqSQBwWxw0\n" \
+"+LQAMjhUUUd2eNAk+5wZHVIklJtFeiOxQnNv4UAg/mV9ep1J20W68RgwnwSoOcP5\n" \
+"whwShAEKmx9tptYqDLdGZ1J49vYhoeY6Rh5q6TDShz4WBo+syplo/UMijdNMmZDX\n" \
+"rB1NbXALs1ic0JcA3cjiL7lETaVhYB//TY4FP5HTuMfCfRWzNSOTZMTdQCsRe66W\n" \
+"RCA5VlhCSUywM4HdNQo3ili2w5uNUyPIlH4AEa8xMVxwT+kpXA2nhGWroQcSEYmN\n" \
+"cfg=\n" \
+"-----END CERTIFICATE-----\n";
+
+
 //definindo constantes para conexão com wi-fi e db:
 const char* ssid = "Inteli-COLLEGE";
 const char* password = "QazWsx@123";
 int LED = 8;
-const char* serverName = "http://10.128.64.132:1234/medidas/add";
+const char* serverName = "https://keepgrowing-api.fly.dev:443/medidas/add";
 WiFiServer server(80);
 
 //#include <Adafruit_BusIO_Register.h>
@@ -25,7 +54,7 @@ WiFiServer server(80);
 #define GREEN_RGB 10
 #define BLUE_RGB 11
 #define BUZZER 8//Buzzer
-#define RED 8//Led vermelho
+#define RED 5//Led vermelho
 
 Adafruit_AHTX0 aht;
 
@@ -37,7 +66,7 @@ LiquidCrystal_I2C lcd(0x27, lcdColumns, lcdRows);
 
 //variaveis longas para guardadar tempo:
 unsigned long lastTime = 0;
-unsigned long timerDelay = 60000;
+unsigned long timerDelay = 6000;
 
 
 void setup(){
@@ -101,9 +130,11 @@ aht.getEvent(&humidity, &temp);
     //verifica status da conexão
     if(WiFi.status()==WL_CONNECTED){
 
-      WiFiClient client;
+      WiFiClientSecure client;
       HTTPClient http;
 
+      client.setCACert(root_ca);
+      
       //caminho do servidor
       http.begin(client, serverName);
 
@@ -124,21 +155,7 @@ aht.getEvent(&humidity, &temp);
     }
     lastTime = millis();
   }
-  /*if (client) {
-    Serial.println("New Client.");
-    String currentLine = "";
-    //while (client.connected()) {
-   if (client.available()) {
-      char c = client.read();
-      Serial.write(c);
-      client.println("HTTP/1.1 200 OK"); 
-      client.println("Content-type:text/html");
-      client.println();
-      client.print("tempretura atual:"+String(temperatura));
-      client.print("umidade atual:" + String(umidade));
-      client.println();  
-      }
-  }*/
+
   
   delay(500);
 

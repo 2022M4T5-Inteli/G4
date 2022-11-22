@@ -1,24 +1,24 @@
-// Required for accessing the database
+// Para acessar o banco de dados
 const { PrismaClient, Prisma } = require("@prisma/client");
 const prisma = new PrismaClient();
 
-// Required for route handling
+// Para tratamento da rota
 const express = require("express");
 const router = express.Router();
 
-// All Routes here (there should only be controllers) ----------------------------------------------------------------------------------------
+// todas as rotas se encontram aqui:All Routes here (there should only be controllers) ----------------------------------------------------------------------------------------
 
-// [GET] requests
+// requesição [GET] para a lista de dispositivos que estão no banco de dados
 
 router.get("/list", async (request, response) => {
-  // returns all the dispositivos that are in the database
+  // retorna todos os dispositivos que estão no banco de dados
   const dispositivos = await prisma.dispositivo.findMany();
   const responseObj = { data: dispositivos, error: false };
   return response.json(responseObj);
 });
 
 router.get("/list/detailed", async (request, response) => {
-  // returns all the dispositivos that are in the database
+  // retorna os dispositivos que estão no banco de dados com detalhes.
   const dispositivos = await prisma.dispositivo.findMany({
     include: {
       Medidas: {
@@ -33,19 +33,19 @@ router.get("/list/detailed", async (request, response) => {
   return response.json(responseObj);
 });
 
-// [POST] requests
+//requesição [POST] para adicionar um novo dispositivo no banco de dados
 
 router.post("/add", async (request, response) => {
   const dispositivoMac = request.body.mac;
   const dispositivoName = request.body.nome || dispositivoMac;
-  // checks if the current mac exists on the database
+  // confere se o dispositivo ja existe no banco de dados
   const dispositivoExists = await prisma.dispositivo.findUnique({
     where: {
       mac: dispositivoMac,
     },
   });
 
-  // Returns an error if the dispositivo already exists
+  //caso o dispositivo ja exista retorna uma mensagem falando que o dispositivo já existe 
   if (dispositivoExists) {
     response.statusCode = 500;
     return response.json({
@@ -55,7 +55,7 @@ router.post("/add", async (request, response) => {
     });
   }
 
-  // creates the dispositivo
+  // caso não exista o dispositivo é criado
   const dispositivo = await prisma.dispositivo.create({
     data: {
       estufa: dispositivoName,
@@ -63,7 +63,7 @@ router.post("/add", async (request, response) => {
     },
   });
 
-  // returns the newly created dispositivo
+  // e retorna uma mensagem falando que o dispositivo foi adicionado com sucesso
   response.statusCode = 200;
   return response.send({
     message: "Dispositivo Adicionado com sucesso!",
@@ -72,20 +72,21 @@ router.post("/add", async (request, response) => {
   });
 });
 
+//requesição [POST] para editar um dispositivo no banco de dados
+
 router.post("/edit", async (request, response) => {
   const dispositivoId = request.body.id;
   const dispositivoName = request.body.nome;
 
-  // checks if the current mac exists on the database
+  // confere se o dispositivo ja existe no banco de dados
   const dispositivoExists = await prisma.dispositivo.findUnique({
     where: {
       id: dispositivoId,
     },
   });
-
-  // Returns an error if the dispositivo already exists
+  //confere se o dipositivo existe
   if (dispositivoExists) {
-    // updates the dispositivo by id
+    // caso exista ele é atualizado pelo id
     const updateDispositivo = await prisma.dispositivo.update({
       where: {
         id: dispositivoId,
@@ -94,7 +95,7 @@ router.post("/edit", async (request, response) => {
         estufa: dispositivoName,
       },
     });
-
+    //retorna uma mensagem falando ao usuario que o dispositivo foi editado com sucesso
     response.statusCode = 200;
     return response.json({
       message: "Dispositivo editado com sucesso",
@@ -102,7 +103,7 @@ router.post("/edit", async (request, response) => {
       error: false,
     });
   }
-
+  //caso ocorra algum erro retorna uma mensagem falando que não foi possivel editar o dispositivo
   response.statusCode = 500;
   return response.json({ message: "Erro ao editar dispositivo", error: true });
 });

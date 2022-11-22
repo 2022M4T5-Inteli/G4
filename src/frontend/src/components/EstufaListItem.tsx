@@ -1,3 +1,5 @@
+//codigo referente a pagina que contem a lista de todas as estufas, pagina inicial
+//importando os componentes do ionic
 import {
   IonCard,
   IonCardContent,
@@ -6,6 +8,7 @@ import {
   IonNote,
   IonText,
 } from "@ionic/react";
+//importando  css da pagina
 import "./EstufaListItem.css";
 
 interface MessageListItemProps {
@@ -24,6 +27,7 @@ const EstufaListItem: React.FC<MessageListItemProps> = ({
   time,
 }) => {
   return (
+    //criando o link de cada estufa pelo id e criando o conteudo de cada card
     <IonCard routerLink={`/estufa/${id}`}>
       <IonCardContent className="card-container">
         <div className="metrics-div flex-start">

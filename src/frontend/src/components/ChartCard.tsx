@@ -12,7 +12,7 @@ import {
 import "./ChartCard.css";
 //importando o tipo de grafico
 import { Line, Bar, Pie, Doughnut } from "react-chartjs-2";
-import Chart, { CategoryScale } from "chart.js/auto";
+// import Chart, { CategoryScale } from "chart.js/auto";
 
 interface DatasetProps {
   data: number[];
@@ -29,7 +29,7 @@ interface ChartCardProps {
 }
 
 const ChartCard: React.FC<ChartCardProps> = ({ data }) => {
-  Chart.register(CategoryScale);
+  // Chart.register(CategoryScale);
   return (
     <IonCard>
       <IonCardContent>

@@ -58,6 +58,12 @@ WiFiServer server(80);
 #define BUZZER 8//Buzzer
 #define RED 5//Led vermelho
 
+//contantes com limite de temperatura:
+
+const float tempMin = 28;
+const float tempMax = 36;
+
+
 Adafruit_AHTX0 aht;
 
 //definindo o numero de colunas e linhas do display LCD
@@ -165,13 +171,14 @@ aht.getEvent(&humidity, &temp);
   delay(500);
 
   //definindo se caso a temperatura não esteja entre o intervalo que a estufa precise ligue o led vermelho, caso esteja dentro das condiçoes vai ligar o led verde.
-  if (28 <= temp.temperature && temp.temperature <= 36) {
+  if (tempMin <= temp.temperature && temp.temperature <= tempMax) {
     digitalWrite(RED_RGB, LOW);
     digitalWrite(GREEN_RGB, HIGH);
     digitalWrite(BLUE_RGB, LOW);
     noTone(8);
     delay(500);
   }
+  
   else{
     digitalWrite(RED_RGB, HIGH);
     digitalWrite(GREEN_RGB, LOW);

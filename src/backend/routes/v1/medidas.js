@@ -39,35 +39,48 @@ router.post("/add", async (request, response) => {
   const medidasTemperatura = request.body.temperatura;
   const medidasUmidade = request.body.umidade;
   const medidasDatetime = request.body.datetime;
+  try {
+    // cria a medida
+    const medidas = await prisma.medidas.create({
+      data: {
+        dispositivoId: dispositivoId,
+        temperatura: medidasTemperatura,
+        umidade: medidasUmidade,
+        datetime: medidasDatetime,
+      },
+    });
 
-  // cria a medida
-  const medidas = await prisma.medidas.create({
-    data: {
-      dispositivoId: dispositivoId,
-      temperatura: medidasTemperatura,
-      umidade: medidasUmidade,
-      datetime: medidasDatetime,
-    },
-  });
+    const validator = new MetricValidator(medidasTemperatura, medidasUmidade);
+    const statusList = validator.verifyRules();
 
-  const validator = new MetricValidator(medidasTemperatura, medidasUmidade);
-  const statusList = validator.verifyRules();
+    statusList.forEach(async (statusCode) => {
+      const notificacao = new Notificacao(
+        dispositivoId,
+        medidas.id,
+        statusCode
+      );
+      const createNotification = await notificacao.createNotification();
+      if (createNotification == true) {
+        console.log("Notificação Gerada!!");
+      }
+    });
 
-  statusList.forEach(async (statusCode) => {
-    const notificacao = new Notificacao(dispositivoId, medidas.id, statusCode);
-    const createNotification = await notificacao.createNotification();
-    if (createNotification == true) {
-      console.log("Notificação Gerada!!");
-    }
-  });
-
-  // retorna a medida criada
-  response.statusCode = 200;
-  return response.send({
-    message: "Medidas Adicionadas com sucesso!",
-    data: medidas,
-    error: false,
-  });
+    // retorna a medida criada
+    response.statusCode = 200;
+    return response.send({
+      message: "Medidas Adicionadas com sucesso!",
+      data: medidas,
+      error: false,
+    });
+  } catch (error) {
+    console.log(error);
+    response.statusCode = 500;
+    return response.send({
+      message: `Erro ao adicionar medida! ${error.message}`,
+      data: [],
+      error: true,
+    });
+  }
 });
 
 module.exports = router;

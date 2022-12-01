@@ -85,13 +85,21 @@ const Home: React.FC = () => {
             className="logo"
             src="./assets/keepgrowing-logo.png"
           ></IonImg>
-          <IonButtons slot="end">
+          <IonButtons className="notificationbutton" slot="end">
             <IonButton
+              size="large"
               className="toolbar-buttons-container"
               routerLink={`/notifications`}
             >
               <IonBadge color={"danger"}>{notificacoes.length}</IonBadge>
-              <IonIcon slot="icon-only" icon={notifications}></IonIcon>
+              <IonImg
+                // size="x-large" className="butao" slot="icon-only" icon={notifications}
+                slot="end"
+                className="notificationpagebutton"
+                src="./assets/bellicon.png"
+              >
+
+              </IonImg>
             </IonButton>
           </IonButtons>
         </IonToolbar>

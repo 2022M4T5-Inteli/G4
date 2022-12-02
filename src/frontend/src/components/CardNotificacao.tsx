@@ -46,12 +46,14 @@ const CardNotificacao: React.FC<CardNotificacaoInputs> = ({
         </div>
         <div className="botao-div">
           <IonButton
+            color="success" 
+            className="dispensarbutton"
             onClick={() => {
               onclickHandler();
             }}
           >
             Dispensar
-            <IonIcon icon={checkmark} color={"light"} />
+            <IonIcon icon={checkmark} color={"light"} className="icon-class" />
           </IonButton>
         </div>
       </IonCardContent>

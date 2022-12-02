@@ -1,0 +1,36 @@
+.logo {
+  padding: 1.2em;
+  height: 7em;
+  width: 200px;
+  margin-right: 0px;
+}
+
+ion-badge {
+  position: absolute;
+  top: -0.03rem;
+  right: -0.1rem;
+  opacity: 0.9;
+}
+
+.notificationpagebutton{
+  width: 2.5em;
+  height: 2.5em;
+}
+
+.notificationbutton{
+  margin-right: 4em;
+}
+
+.navigation-button {
+  display: flex;
+  flex-direction: column;
+  height: 4em;
+  margin: 1.2em;
+}
+
+.content-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.1em;
+}

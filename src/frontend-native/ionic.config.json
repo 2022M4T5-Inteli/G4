@@ -1,0 +1,7 @@
+{
+  "name": "keepgrowing-neo",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}

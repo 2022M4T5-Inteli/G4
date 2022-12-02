@@ -1,0 +1,36 @@
+/*css da lista de estufas*/
+/* css dos cards */
+.card-container {
+  padding: 2em;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #298350;
+  color: white;
+}
+
+.card-name {
+  font-size: x-large;
+}
+
+.metrics-title {
+  font-size: x-large;
+}
+
+.metrics-div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.flex-start {
+  align-items: flex-start;
+}
+
+.flex-end {
+  align-items: flex-end;
+}
+
+.card-subinfo {
+  font-size: 1.1em;
+}

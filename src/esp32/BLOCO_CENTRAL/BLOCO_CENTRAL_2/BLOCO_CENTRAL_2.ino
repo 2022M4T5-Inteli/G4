@@ -12,41 +12,71 @@ HTTPClient essa biblioteca fornece uma API para as solicitações HTTP serem cri
 #include <WiFi.h>
 #include <HTTPClient.h>
 
-const char* root_ca = \
+//incluindo bibliotecas para comunicação com o servidor remoto
+#include <WiFiClientSecure.h>
+#include <WiFi.h>
+
+// Biblioteca para registro de tempo no ESP32
+#include "time.h"
+
+// Biblioteca para serialização de string para JSON
+#include <ArduinoJson.h>
+
+// Biblioteca para salvar e modificar configurações
+#include <Preferences.h>
+
+// Bibliotecas para webserver
+#include <Uri.h>
+#include <WebServer.h>
+
+
+// Certificado para comunicação HTTPS
+const char* root_ca= \
 "-----BEGIN CERTIFICATE-----\n" \
-"MIIETjCCAzagAwIBAgISA9otMSuMr7adH8i5RZ50JyWdMA0GCSqGSIb3DQEBCwUA\n" \
-"MDIxCzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MQswCQYDVQQD\n" \
-"EwJSMzAeFw0yMjA5MjQyMzI0MDRaFw0yMjEyMjMyMzI0MDNaMBQxEjAQBgNVBAMM\n" \
-"CSouZmx5LmRldjBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABEUhlkSYvdPtnf1J\n" \
-"w9WVCJ074p6S4LV4w6fcOHKeaUh0/y0zo2SAU3lXBxt988bEd/51bv6GIss2MNJI\n" \
-"rTTAsHmjggJFMIICQTAOBgNVHQ8BAf8EBAMCB4AwHQYDVR0lBBYwFAYIKwYBBQUH\n" \
-"AwEGCCsGAQUFBwMCMAwGA1UdEwEB/wQCMAAwHQYDVR0OBBYEFMt9kWuycE2DOhv2\n" \
-"JqWX5AvKHNOwMB8GA1UdIwQYMBaAFBQusxe3WFbLrlAJQOYfr52LFMLGMFUGCCsG\n" \
-"AQUFBwEBBEkwRzAhBggrBgEFBQcwAYYVaHR0cDovL3IzLm8ubGVuY3Iub3JnMCIG\n" \
-"CCsGAQUFBzAChhZodHRwOi8vcjMuaS5sZW5jci5vcmcvMBQGA1UdEQQNMAuCCSou\n" \
-"Zmx5LmRldjBMBgNVHSAERTBDMAgGBmeBDAECATA3BgsrBgEEAYLfEwEBATAoMCYG\n" \
-"CCsGAQUFBwIBFhpodHRwOi8vY3BzLmxldHNlbmNyeXB0Lm9yZzCCAQUGCisGAQQB\n" \
-"1nkCBAIEgfYEgfMA8QB2ACl5vvCeOTkh8FZzn2Old+W+V32cYAr4+U1dJlwlXceE\n" \
-"AAABg3IHmrEAAAQDAEcwRQIgRkZwKGLgAp/8z/F/o3WvT1AQzgwKG5CkkcCpbpi7\n" \
-"C6cCIQCkUDA8bqzTkyLEiXyaQjLkhpwVsFHk/RtuqV+/RDt18AB3AG9Tdqwx8DEZ\n" \
-"2JkApFEV/3cVHBHZAsEAKQaNsgiaN9kTAAABg3IHnAwAAAQDAEgwRgIhALZECaLj\n" \
-"tKpW13i1APgtlbYY6i2DdG5ZCpzIpDywptcFAiEAzOk8xeZeXk9bOmMgyQDjehg8\n" \
-"0wDCxh6wIlNoIaLwDW8wDQYJKoZIhvcNAQELBQADggEBAEdmPvIgbkMGv+gEDMQ6\n" \
-"X5MFdrSKcWp/o+1Xhx1AThhiyZbq908OesJCP8Re49X9QvnJ9s3ArqUqSQBwWxw0\n" \
-"+LQAMjhUUUd2eNAk+5wZHVIklJtFeiOxQnNv4UAg/mV9ep1J20W68RgwnwSoOcP5\n" \
-"whwShAEKmx9tptYqDLdGZ1J49vYhoeY6Rh5q6TDShz4WBo+syplo/UMijdNMmZDX\n" \
-"rB1NbXALs1ic0JcA3cjiL7lETaVhYB//TY4FP5HTuMfCfRWzNSOTZMTdQCsRe66W\n" \
-"RCA5VlhCSUywM4HdNQo3ili2w5uNUyPIlH4AEa8xMVxwT+kpXA2nhGWroQcSEYmN\n" \
-"cfg=\n" \
+"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\n" \
 "-----END CERTIFICATE-----\n";
 
 
-//definindo constantes para conexão com wi-fi e db:
-const char* ssid = "Inteli-COLLEGE";
-const char* password = "QazWsx@123";
-int LED = 8;
-const char* serverName = "https://keepgrowing-api.fly.dev:443/medidas/add";
-WiFiServer server(80);
+
+// Servidor remoto
+const char* serverName = "https://keepgrowing-api.fly.dev";
+
+// Servidor local
+WebServer server(80);
+
+//definido para guardar o id do dispositivo
+int dispositiveId;
+
+// Variável para controle de estado de conexão wifi
+bool connected = false;
 
 //#include <Adafruit_BusIO_Register.h>
 //definindo as saídas de cada componente da solução VER SE ESSA PARTE TA CERTA DEFINIR MELHORS
@@ -77,6 +107,223 @@ unsigned long lastTime = 0;
 unsigned long timerDelay = 6000;
 
 
+// Definição da estrutura base para serialização JSON
+StaticJsonDocument<250> jsonDocument;
+char buffer[250];
+
+
+
+// Variáveis para registro de tempo
+const char* ntpServer1 = "pool.ntp.org";
+const char* ntpServer2 = "time.nist.gov";
+const long  gmtOffset_sec = -10800;
+const int   daylightOffset_sec = 0;
+char formattedTime[20];
+
+// Instanciação de classes
+// WiFi
+WiFiClientSecure client;
+HTTPClient http;
+
+// preferências
+Preferences preferences;
+
+
+
+// Funções Auxiliares -------------------------------------------------------------
+
+void saveWifiCredentials(String client_ssid, String client_password) {
+  preferences.putString("client_ssid", client_ssid);      
+  preferences.putString("client_password", client_password);
+  preferences.putBool("wifi-configured", true);
+}
+
+
+void connectWifi(const char* ssid,const char* password) {
+  int tryAttempts = 0;
+  Serial.print("Attempting to connect to SSID: ");
+  Serial.println(ssid);
+  WiFi.begin(ssid, password);
+
+  // attempt to connect to Wifi network:
+  while ((WiFi.status() != WL_CONNECTED) && (tryAttempts < 20)) {
+    Serial.print(".");
+    // wait 1 second for re-trying
+    delay(1000);
+    tryAttempts++;
+    Serial.print("[x] Falha ao conectar ao wifi. Tentativa ");
+    Serial.println(tryAttempts);
+  }
+
+  if(WiFi.status() != WL_CONNECTED) {
+    Serial.print("[x] Não foi possível conectar à rede definida. Total de tentativas:");
+    Serial.println(tryAttempts);    
+  } else {
+  Serial.print("Conectado à ");
+  Serial.println(ssid);
+  
+  Serial.print("Com o IP:");
+  Serial.println(WiFi.localIP());
+  connected = true;
+  }
+
+}
+
+void createWifiAp(const char* ap_ssid, const char* ap_password) {
+  Serial.println("\n[+] Gerando ponto de acesso para configurações!");
+  WiFi.mode(WIFI_AP_STA);
+  WiFi.softAP(ap_ssid, ap_password);
+  delay(100);
+  IPAddress IP = WiFi.softAPIP();
+  Serial.print("\nPonto gerado! Ip do ponto de acesso:");
+  Serial.println(IP);
+}
+
+
+void restartDevice() {
+
+}
+
+int makePostRequest(String serverAddress, String payload) {
+  http.begin(client,serverAddress);
+  http.addHeader("Content-Type", "application/json");
+  int httpResponseCode = http.POST(payload);
+  http.end();
+  return httpResponseCode;
+}
+
+void updateLocalTime()
+{
+  struct tm timeinfo;
+  if(!getLocalTime(&timeinfo)){
+    Serial.println("No time available (yet)");
+    return;
+  }
+  strftime(formattedTime,20, "%Y-%m-%dT%H:%M:%SZ", &timeinfo);  
+}
+
+void sendMetrics(float temperature, float humidity) {
+  String payload = "{\"dispositivoId\": \"" + String(dispositiveId) + "\", \"temperatura\":"+ String(temperature) +",\"umidade\":"+ String(humidity) + ",\"datetime\": \"" + formattedTime +".0Z\"}";
+  Serial.println("[+] Enviando Métricas ao servidor!");
+  Serial.println(payload);
+  makePostRequest(String(serverName) + "/medidas/add", payload);
+  Serial.println("[+] Requisição efetuada!");
+}
+
+//------------------------------------------
+
+// Funções do WebServer
+
+void setupHttp(const char* ca_cert) {
+  client.setCACert(ca_cert);
+}
+
+void postWifiCredentials() {
+  if (server.hasArg("plain") == false) {
+  }
+  String body = server.arg("plain");
+  deserializeJson(jsonDocument, body);
+  
+  String wifi_ssid = jsonDocument["wifi_ssid"];
+  String wifi_password = jsonDocument["wifi_password"];
+  saveWifiCredentials(wifi_ssid, wifi_password);
+  server.send(200, "application/json", "{\"message\":\"Sucesso! O ESP32 Será Reiniciado.\"}");
+  Serial.println("[+] Credenciais de Wifi alteradas com sucesso!");
+  Serial.println(("[i] Reiniciando em 3s!"));
+  delay(3000);
+  ESP.restart();
+}
+
+void postResetHandler() {
+  preferences.clear();
+  server.send(200, "application/json", "{\"message\":\"Sucesso! O ESP32 Será Reiniciado.\"}");
+  Serial.println("[+] Configurações locais resetadas!");
+  Serial.println(("[i] Reiniciando em 3s!"));
+  delay(3000);
+  ESP.restart();
+}
+
+void getDispositiveInfo() {
+  String jsonData = "{\"message\":\"test\"}";
+  Serial.println("Called function!!");
+  server.send(200, "application/json", jsonData);
+}
+
+void routing_setup() {
+  Serial.println("Routing Setup!");
+  server.on("/info", getDispositiveInfo);
+  server.on("/wifi-update", postWifiCredentials);
+  server.on("/reset", postResetHandler);
+  server.begin();
+}
+
+//--------------------------------------------
+
+
+// Funções de configuração de preferências
+
+void initPreferencesReadWrite() {
+  preferences.begin("settings", false);  
+}
+
+void registerDispositiveId(uint32_t id) {
+  preferences.putUInt("dispositiveId", id);
+  preferences.putBool("registered", true);
+}
+
+bool registerDispositive(String mac, String nome) {
+  String payload = "{\"mac\":\"" + mac +"\",\"nome\": \"" + nome +"\"}";
+  int tryCount = 0;
+  int responseCode;
+
+  while(tryCount < 3) {
+    Serial.println("\n[!] Enviando Requisição de registro.\n");
+    responseCode = makePostRequest(String(serverName)  + "/dispositivos/add", payload);
+    if(responseCode == 200){
+        String body = http.getString();
+        deserializeJson(jsonDocument, body);
+        int registeredId = jsonDocument["data"]["id"];
+        registerDispositiveId(registeredId);
+
+        Serial.println("\n[+] Dispositivo Registrado com sucesso!");
+        Serial.print("\n[+] Id Dispositivo:");
+        Serial.println(registeredId);
+        return true;
+    } else {
+      Serial.println("\n[!] Falha ao registrar dispositivo! Tentativa " + String(tryCount));
+      Serial.println("\n[!] Tentando novamente.\n");
+      delay(2000);
+      tryCount++;
+    }  
+  }
+  Serial.println("\n[x] Não foi possível registrar o dispositivo.\n");
+  return false;
+}
+
+
+// ---------------------------------------------
+
+void runHandler() {
+  initPreferencesReadWrite();
+
+  createWifiAp("teste-esp32-esp", "password123");
+  if(preferences.getBool("wifi-configured") == true) {
+    connectWifi(preferences.getString("client_ssid").c_str(), preferences.getString("client_password").c_str());
+    setupHttp(root_ca);
+
+    if(preferences.getBool("registered") == false) {
+      String mac = WiFi.macAddress();
+      bool isRegistred = registerDispositive(mac, preferences.getString("dispositiveName", "sem-nome-" + mac));
+    }
+
+  }
+
+  dispositiveId = preferences.getUInt("dispositiveId", 0);
+
+  routing_setup();
+}
+
+
 void setup(){
   Serial.begin(115200);
   //setup dos leds
@@ -97,25 +344,16 @@ void setup(){
   //ligando a luz do LCD                      
   lcd.backlight();
 
-  //conexão com wifi:
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-    break;
-  }
+  Serial.println("\n\n[i] Iniciando Setup do dispositivo.\n\n");
+  runHandler();
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer1, ntpServer2);
 
-  Serial.println("");
-  Serial.println("WiFi conectada.");
-  //print o endereço do IP
-  Serial.println("Endereço de IP: ");
-  Serial.println(WiFi.localIP());
 
-  server.begin();
   delay(500);
 }
 
 void loop(){
+  server.handleClient();
   //definindo as informações que vão passar na primeira linha do LCD
 sensors_event_t humidity, temp;
 aht.getEvent(&humidity, &temp);
@@ -140,29 +378,15 @@ aht.getEvent(&humidity, &temp);
     //caso o wifi esteja conectado:
     if(WiFi.status()==WL_CONNECTED){
 
-      WiFiClientSecure client;
-      HTTPClient http;
-
-      client.setCACert(root_ca);
-      
-      //caminho do servidor
-      http.begin(client, serverName);
-
-      //enviando JSON
-      http.addHeader("Content-Type", "application/json");
-      int httpResponseCode = http.POST("{\"dispositivoId\": \"1\", \"temperatura\":"+ String(temperatura) +",\"umidade\":"+ String(umidade) + ",\"datetime\": \"2022-01-20T12:01:30.543Z\"}");
-
-      Serial.print("HTTP Response code: ");
-      Serial.println(httpResponseCode);
-      delay(100);  
-
-      //termina request
-      http.end();
-
+      delay(100);
+      updateLocalTime();
+      sendMetrics(temperatura, umidade);
+      digitalWrite(RED, LOW);
     }
     //caso o wifi esteja desconectado
     else{
-      Serial.println("WiFi Disconnected");
+      Serial.println("[!] WiFi Disconectado!!");
+      digitalWrite(RED, HIGH);
     }
     lastTime = millis();
   }

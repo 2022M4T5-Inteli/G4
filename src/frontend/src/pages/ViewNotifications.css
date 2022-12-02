@@ -42,3 +42,7 @@
 ion-toolbar {
   --min-height:4em;
 }
+
+.cardnotificacao{
+  color: red;
+}

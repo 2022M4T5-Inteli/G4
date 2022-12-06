@@ -1,20 +1,22 @@
 
-/*incluindo as bibliotecas Adafruit_AHTX0, Wire, LiquidCrystal
+// Incluindo classe para implementação do fluxo de erro
+#include "Apolo.h"
+
+// Inlcuindo tab com funções para conexão wifi
+#include "Connection.h"
+
+// Incluindo tab com funções para o display LCD
+#include "Display.h"
+
+/*incluindo as bibliotecas Adafruit_AHTX0,
 Adafruit_AHTX0 para o sensor de temperatura e umidade
-Wire que vai permitir enviar e receber dados por meio da interface I2C em uma rede de sensores
-LiquidCrystal_I2C para o display LCD
-WiFi essa biblioteca habilita a conexão de rede, tanto redes locais quanto internet, podendo intanciar Servidores, Clientes e enviar ou receber pacotes UDP por meio do WiFi
 HTTPClient essa biblioteca fornece uma API para as solicitações HTTP serem criadas e executadas a partir de seu modelo
 */
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
 #include <Adafruit_AHTX0.h>
-#include <WiFi.h>
 #include <HTTPClient.h>
 
 //incluindo bibliotecas para comunicação com o servidor remoto
 #include <WiFiClientSecure.h>
-#include <WiFi.h>
 
 // Biblioteca para registro de tempo no ESP32
 #include "time.h"
@@ -65,6 +67,8 @@ const char* root_ca= \
 "-----END CERTIFICATE-----\n";
 
 
+// Logger de erros
+ApoloError logger;
 
 // Servidor remoto
 const char* serverName = "https://keepgrowing-api.fly.dev";
@@ -74,9 +78,6 @@ WebServer server(80);
 
 //definido para guardar o id do dispositivo
 int dispositiveId;
-
-// Variável para controle de estado de conexão wifi
-bool connected = false;
 
 //#include <Adafruit_BusIO_Register.h>
 //definindo as saídas de cada componente da solução VER SE ESSA PARTE TA CERTA DEFINIR MELHORS
@@ -96,11 +97,6 @@ const float tempMax = 36;
 
 Adafruit_AHTX0 aht;
 
-//definindo o numero de colunas e linhas do display LCD
-int lcdColumns = 16;
-int lcdRows = 2;
-//definindo o endereço do LCD
-LiquidCrystal_I2C lcd(0x27, lcdColumns, lcdRows);  
 
 //variaveis longas para guardadar tempo:
 unsigned long lastTime = 0;
@@ -138,52 +134,6 @@ void saveWifiCredentials(String client_ssid, String client_password) {
   preferences.putBool("wifi-configured", true);
 }
 
-
-void connectWifi(const char* ssid,const char* password) {
-  int tryAttempts = 0;
-  Serial.print("Attempting to connect to SSID: ");
-  Serial.println(ssid);
-  WiFi.begin(ssid, password);
-
-  // attempt to connect to Wifi network:
-  while ((WiFi.status() != WL_CONNECTED) && (tryAttempts < 20)) {
-    Serial.print(".");
-    // wait 1 second for re-trying
-    delay(1000);
-    tryAttempts++;
-    Serial.print("[x] Falha ao conectar ao wifi. Tentativa ");
-    Serial.println(tryAttempts);
-  }
-
-  if(WiFi.status() != WL_CONNECTED) {
-    Serial.print("[x] Não foi possível conectar à rede definida. Total de tentativas:");
-    Serial.println(tryAttempts);    
-  } else {
-  Serial.print("Conectado à ");
-  Serial.println(ssid);
-  
-  Serial.print("Com o IP:");
-  Serial.println(WiFi.localIP());
-  connected = true;
-  }
-
-}
-
-void createWifiAp(const char* ap_ssid, const char* ap_password) {
-  Serial.println("\n[+] Gerando ponto de acesso para configurações!");
-  WiFi.mode(WIFI_AP_STA);
-  WiFi.softAP(ap_ssid, ap_password);
-  delay(100);
-  IPAddress IP = WiFi.softAPIP();
-  Serial.print("\nPonto gerado! Ip do ponto de acesso:");
-  Serial.println(IP);
-}
-
-
-void restartDevice() {
-
-}
-
 int makePostRequest(String serverAddress, String payload) {
   http.begin(client,serverAddress);
   http.addHeader("Content-Type", "application/json");
@@ -203,10 +153,15 @@ void updateLocalTime()
 }
 
 void sendMetrics(float temperature, float humidity) {
+  int statusCode;
   String payload = "{\"dispositivoId\": \"" + String(dispositiveId) + "\", \"temperatura\":"+ String(temperature) +",\"umidade\":"+ String(humidity) + ",\"datetime\": \"" + formattedTime +".0Z\"}";
   Serial.println("[+] Enviando Métricas ao servidor!");
   Serial.println(payload);
-  makePostRequest(String(serverName) + "/medidas/add", payload);
+  statusCode = makePostRequest(String(serverName) + "/medidas/add", payload);
+  if(statusCode != 200) {
+    logger.logMessage("C01U - Erro ao se comunicar com o servidor remoto!", 0);
+    logger.displayError("C01U", lcd);
+  }
   Serial.println("[+] Requisição efetuada!");
 }
 
@@ -218,6 +173,8 @@ void setupHttp(const char* ca_cert) {
   client.setCACert(ca_cert);
 }
 
+// Função que cuida da requisição POST para recebimento
+// das credenciais de WiFi
 void postWifiCredentials() {
   if (server.hasArg("plain") == false) {
   }
@@ -234,6 +191,7 @@ void postWifiCredentials() {
   ESP.restart();
 }
 
+// Função que cuida da requisição POST para reiniciar o dispositivo
 void postResetHandler() {
   preferences.clear();
   server.send(200, "application/json", "{\"message\":\"Sucesso! O ESP32 Será Reiniciado.\"}");
@@ -243,12 +201,14 @@ void postResetHandler() {
   ESP.restart();
 }
 
+// Função que cuida da requisição GET para testar a saúde servidor do dispositivo
 void getDispositiveInfo() {
   String jsonData = "{\"message\":\"test\"}";
   Serial.println("Called function!!");
   server.send(200, "application/json", jsonData);
 }
 
+// Função que assimila as rotas do servidor com suas funções representantes
 void routing_setup() {
   Serial.println("Routing Setup!");
   server.on("/info", getDispositiveInfo);
@@ -261,16 +221,18 @@ void routing_setup() {
 
 
 // Funções de configuração de preferências
-
 void initPreferencesReadWrite() {
   preferences.begin("settings", false);  
 }
 
+// Função que salva o ID do dispositivo localmente
 void registerDispositiveId(uint32_t id) {
   preferences.putUInt("dispositiveId", id);
   preferences.putBool("registered", true);
 }
 
+// Função que registra o dispositivo remotamente
+// e guarda o ID recebido localmente
 bool registerDispositive(String mac, String nome) {
   String payload = "{\"mac\":\"" + mac +"\",\"nome\": \"" + nome +"\"}";
   int tryCount = 0;
@@ -303,6 +265,8 @@ bool registerDispositive(String mac, String nome) {
 
 // ---------------------------------------------
 
+// Função que executa uma série de inicializações necessárias
+// para controle de preferências e configuração WiFi
 void runHandler() {
   initPreferencesReadWrite();
 
@@ -323,6 +287,13 @@ void runHandler() {
   routing_setup();
 }
 
+// Função para checar por erros na medição de temperatura e umidade
+void checkSensorIntegrity(float temperatura, float umidade) {
+  if(temperatura == NULL || temperatura == 0.0 || umidade == NULL || umidade == 0.0) {
+    logger.logMessage("H00U - Dados do sensor inválidos! Temperatura e/ou umidade nulos.", 0);
+    logger.displayError("H00U", lcd);
+  }
+}
 
 void setup(){
   Serial.begin(115200);
@@ -333,16 +304,12 @@ void setup(){
   pinMode(BUZZER, OUTPUT);
   pinMode(RED, OUTPUT);  
   //setup dos pins SDA e SCL
-  Wire.begin(SDA_PIN, SCL_PIN);
+  setupLCD(SDA_PIN, SCL_PIN);
   if (! aht.begin()) {
      Serial.println("Could not find AHT? Check wiring");
      while (1) delay(10);
    }
    Serial.println("AHT10 or AHT20 found");
-  // iniciando o display LCD
-  lcd.init();
-  //ligando a luz do LCD                      
-  lcd.backlight();
 
   Serial.println("\n\n[i] Iniciando Setup do dispositivo.\n\n");
   runHandler();
@@ -355,8 +322,8 @@ void setup(){
 void loop(){
   server.handleClient();
   //definindo as informações que vão passar na primeira linha do LCD
-sensors_event_t humidity, temp;
-aht.getEvent(&humidity, &temp);
+  sensors_event_t humidity, temp;
+  aht.getEvent(&humidity, &temp);
   lcd.setCursor(0, 0);
 
   //variaveis que guardam valores captados pelo sensor
@@ -364,20 +331,19 @@ aht.getEvent(&humidity, &temp);
   float temperatura = temp.temperature;
 
   // definindo a mensagem que vai passar
-  lcd.print("Umidade: " + String(umidade));
+  printLCD("Umidade: " + String(umidade));
   
   delay(500);
  
   //definindo as informações que vão passar na segunda linha do LCD
-  lcd.setCursor(0,1);
-  lcd.print("Temperatura: " + String(temperatura));
+  setCursorLCD(0,1);
+  printLCD("Temperatura: " + String(temperatura));
 
   //passando valores via wifi
   if ((millis() - lastTime) > timerDelay){
     //verifica status da conexão
     //caso o wifi esteja conectado:
-    if(WiFi.status()==WL_CONNECTED){
-
+    if(isWifiConnected()){
       delay(100);
       updateLocalTime();
       sendMetrics(temperatura, umidade);
@@ -385,7 +351,8 @@ aht.getEvent(&humidity, &temp);
     }
     //caso o wifi esteja desconectado
     else{
-      Serial.println("[!] WiFi Disconectado!!");
+      logger.logMessage("C00U - Wifi desconectado!", 0);
+      logger.displayError("C00U", lcd);
       digitalWrite(RED, HIGH);
     }
     lastTime = millis();
@@ -393,6 +360,8 @@ aht.getEvent(&humidity, &temp);
 
   
   delay(500);
+  // checa a integridade dos dados do sensor
+  checkSensorIntegrity(temperatura, umidade);
 
   //definindo se caso a temperatura não esteja entre o intervalo que a estufa precise ligue o led vermelho, caso esteja dentro das condiçoes vai ligar o led verde.
   if (tempMin <= temp.temperature && temp.temperature <= tempMax) {

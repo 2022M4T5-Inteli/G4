@@ -53,17 +53,17 @@ router.post("/add", async (request, response) => {
     const validator = new MetricValidator(medidasTemperatura, medidasUmidade);
     const statusList = validator.verifyRules();
 
-    statusList.forEach(async (statusCode) => {
+    for (const statusCode of statusList) {
       const notificacao = new Notificacao(
         dispositivoId,
         medidas.id,
         statusCode
       );
-      const createNotification = await notificacao.createNotification();
+      const createNotification = await notificacao.processNotification();
       if (createNotification == true) {
         console.log("Notificação Gerada!!");
       }
-    });
+    }
 
     // retorna a medida criada
     response.statusCode = 200;

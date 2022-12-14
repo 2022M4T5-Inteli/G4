@@ -22,6 +22,7 @@ import "@ionic/react/css/display.css";
 /* Theme variables */
 import "./theme/variables.css";
 import WifiSetup from "./pages/WifiSetup";
+import SettingsSetup from "./pages/Settings";
 
 setupIonicReact();
 
@@ -36,7 +37,10 @@ const App: React.FC = () => (
           <Home />
         </Route>
         <Route path="/wifi-settings" exact={true}>
-          <WifiSetup/>
+          <WifiSetup />
+        </Route>
+        <Route path="/general-settings" exact={true}>
+          <SettingsSetup />
         </Route>
       </IonRouterOutlet>
     </IonReactRouter>

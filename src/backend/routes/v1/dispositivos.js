@@ -45,13 +45,13 @@ router.post("/add", async (request, response) => {
     },
   });
 
-  //caso o dispositivo ja exista retorna uma mensagem falando que o dispositivo já existe 
+  //caso o dispositivo ja exista retorna uma mensagem falando que o dispositivo já existe
   if (dispositivoExists) {
-    response.statusCode = 500;
+    response.statusCode = 200;
     return response.json({
-      message: "O Dispositivo já existe",
-      data: {},
-      error: true,
+      message: "O Dispositivo já existe. Retornando dados cadastrados.",
+      data: dispositivoExists,
+      error: false,
     });
   }
 

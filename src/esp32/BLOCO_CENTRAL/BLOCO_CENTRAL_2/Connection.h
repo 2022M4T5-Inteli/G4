@@ -23,7 +23,8 @@ void connectWifi(const char* ssid,const char* password) {
   // Executado em caso de falha de conexão
   if(WiFi.status() != WL_CONNECTED) {
     Serial.print("[x] Não foi possível conectar à rede definida. Total de tentativas:");
-    Serial.println(tryAttempts);    
+    Serial.println(tryAttempts);   
+    WiFi.setAutoReconnect(false);
   } else {
   Serial.print("Conectado à ");
   Serial.println(ssid);

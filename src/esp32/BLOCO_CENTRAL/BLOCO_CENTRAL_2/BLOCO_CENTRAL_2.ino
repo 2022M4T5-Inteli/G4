@@ -228,6 +228,7 @@ void postWifiCredentials(AsyncWebServerRequest *request, uint8_t *data, size_t l
   request->send(200, "application/json", "{\"message\":\"Sucesso! O ESP32 Será Reiniciado.\"}");  
   Serial.println("[+] Credenciais de Wifi alteradas com sucesso!");
   Serial.println(("[i] Reiniciando!"));
+  delay(2000);
   ESP.restart();
 }
 

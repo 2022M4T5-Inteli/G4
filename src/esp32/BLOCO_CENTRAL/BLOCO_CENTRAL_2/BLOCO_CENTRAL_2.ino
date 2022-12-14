@@ -84,7 +84,7 @@ Preferences preferences;
 
 // Variáveis de configuração ------------------------------------------------
 // Servidor remoto
-String serverName; // = "https://keepgrowing-api.fly.dev";
+String serverName = "https://keepgrowing-api.fly.dev";
 
 // Registro de tempo
 String ntpServer1 = "pool.ntp.org";
@@ -245,17 +245,19 @@ void postSettings(AsyncWebServerRequest *request, uint8_t *data, size_t len, siz
   float newMaxHumidity = float(jsonDocument["maxHumidity"]);
 
   updateSettings(newServerName, newNtpServer1, newNtpServer2, newTempMin, newTempMax, newTempHigh, newTempExtreme, newMinHumidity, newMaxHumidity);
-  request-> send(200, "application/json", "{\"message\":\"Sucesso! O ESP32 Será Reiniciado.\"}");  
+  request-> send(200, "application/json", "{\"message\":\"Sucesso! Configurações alteradas. Reiniciando Dispositivo.\"}");  
   Serial.println("[+] Configurações do dispositivo alteradas!");
-  // should we restart the esp32??
+  delay(2000);
+  ESP.restart();
 }
 
 // Função que cuida da requisição POST para reiniciar o dispositivo
 void postResetHandler(AsyncWebServerRequest *request) {
   preferences.clear();
-  // server.send(200, "application/json", "{\"message\":\"Sucesso! O ESP32 Será Reiniciado.\"}");
+  request->send(200, "application/json", "{\"message\":\"Sucesso! O ESP32 Será Reiniciado.\"}");
   Serial.println("[+] Configurações locais resetadas!");
   Serial.println(("[i] Reiniciando!"));
+  delay(2000);
   ESP.restart();
 }
 
@@ -263,7 +265,9 @@ void postResetHandler(AsyncWebServerRequest *request) {
 void getDispositiveInfo(AsyncWebServerRequest *request) {
   bool connected = isWifiConnected();
   String mac = WiFi.macAddress();
-  String jsonData = "{\"data\":{\"dispositiveId\":\"" + String(dispositiveId) + "\",\"connected\":" + String(connected) + ",\"mac\":\"" + mac + "\"}}";
+  IPAddress localIP = WiFi.softAPIP();
+  IPAddress networkIp = WiFi.localIP();
+  String jsonData = "{\"data\":{\"dispositiveId\":\"" + String(dispositiveId) + "\",\"connected\":" + String(connected) + ",\"mac\":\"" + mac + "\", \"apIp\":\"" + localIP.toString() + "\", \"networkIp\":\"" + networkIp.toString() + "\"}}";
   Serial.println("Called function!!");
   request->send(200, "application/json", jsonData);
 }

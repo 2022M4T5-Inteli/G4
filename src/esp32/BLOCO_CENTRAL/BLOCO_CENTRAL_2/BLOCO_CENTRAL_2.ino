@@ -27,6 +27,10 @@ HTTPClient essa biblioteca fornece uma API para as solicitações HTTP serem cri
 // Biblioteca para salvar e modificar configurações
 #include <Preferences.h>
 
+
+// Classe para salvar dados de temperatura e umidade localmente
+#include "Buffer.h"
+
 // Bibliotecas para webserver
 #include <Uri.h>
 #include <AsyncTCP.h>
@@ -34,6 +38,8 @@ HTTPClient essa biblioteca fornece uma API para as solicitações HTTP serem cri
 
 
 #include "Requests.h"
+
+
 // Logger de erros
 ApoloError logger;
 
@@ -101,6 +107,12 @@ float tempExtreme = 39;
 float minHumidity = 66.5;
 float maxHumidity = 90.25;
 
+// Registro de informações locais
+const int MAX_BUFFER_ENTRIES = 1440;
+String COLUMN_NAMES = "temp,hum,date";
+
+MetricsStorage localBuffer(preferences, MAX_BUFFER_ENTRIES, COLUMN_NAMES);
+
 // Funções Auxiliares -------------------------------------------------------------
 
 void saveWifiCredentials(String client_ssid, String client_password) {
@@ -119,18 +131,27 @@ void updateLocalTime()
   strftime(formattedTime,20, "%Y-%m-%dT%H:%M:%SZ", &timeinfo);  
 }
 
-void sendMetrics(float temperature, float humidity) {
-  int statusCode;
-  String payload = "{\"dispositivoId\": \"" + String(dispositiveId) + "\", \"temperatura\":"+ String(temperature) +",\"umidade\":"+ String(humidity) + ",\"datetime\": \"" + formattedTime +".0Z\"}";
-  Serial.println("[+] Enviando Métricas ao servidor!");
-  Serial.println(payload);
-  statusCode = esp_request.makePostRequest(String(serverName) + "/medidas/add", payload);
-  
-  if(statusCode != 200) {
-    logger.logMessage("C01U - Erro ao se comunicar com o servidor remoto!", 0);
-    logger.displayError("C01U", lcd);
+void sendMetrics(float temperature, float humidity, bool offline) {
+  if(preferences.getBool("registered") == true){
+    if(offline) {
+      logger.logMessage("Salvando dados localmente!", 2);
+      localBuffer.processMetric(temperature, humidity, formattedTime);    
+    } else {
+      int statusCode;
+      String payload = "{\"dispositivoId\": \"" + String(dispositiveId) + "\", \"temperatura\":"+ String(temperature) +",\"umidade\":"+ String(humidity) + ",\"datetime\": \"" + formattedTime +".0Z\"}";
+      Serial.println("[+] Enviando Métricas ao servidor!");
+      Serial.println(payload);
+      statusCode = esp_request.makePostRequest(String(serverName) + "/medidas/add", payload);
+      
+      if(statusCode != 200) {
+        logger.logMessage("C01U - Erro ao se comunicar com o servidor remoto!", 0);
+        logger.displayError("C01U", lcd);
+      }
+      logger.logMessage("Requisição efetuada!", -1);
+    }
+  } else {
+    logger.logMessage("Dispositivo não registrado!", 0);
   }
-  Serial.println("[+] Requisição efetuada!");
 }
 
 
@@ -138,7 +159,8 @@ void sendMetrics(float temperature, float humidity) {
 
 // Funções de configuração de preferências
 void initPreferencesReadWrite() {
-  preferences.begin("settings", false);  
+  preferences.begin("settings", false);
+  localBuffer.bufferPreference = preferences;
 }
 
 void loadSettings() {
@@ -262,6 +284,11 @@ void postResetHandler(AsyncWebServerRequest *request) {
   ESP.restart();
 }
 
+void postClearBuffer(AsyncWebServerRequest *request) {
+  localBuffer.clearBuffer();
+  request->send(200, "application/json", "{\"message\":\"Dados do buffer resetados!\"}");
+}
+
 // Função que cuida da requisição GET para testar a saúde servidor do dispositivo
 void getDispositiveInfo(AsyncWebServerRequest *request) {
   bool connected = isWifiConnected();
@@ -276,6 +303,11 @@ void getDispositiveInfo(AsyncWebServerRequest *request) {
 void getDispositiveSettings(AsyncWebServerRequest *request) {
   String jsonData = "{\"settings\":{\"serverName\":\"" + serverName + "\",\"ntpServer1\":\"" + ntpServer1 + "\",\"ntpServer2\":\"" + ntpServer2 + "\",\"tempMin\":" + tempMin + ",\"tempMax\":" + tempMax + ",\"tempHigh\":" + tempHigh + ",\"tempExtreme\":" + tempExtreme + ",\"minHumidity\":" + minHumidity + ",\"maxHumidity\":" + maxHumidity + "}}";
   request->send(200, "application/json", jsonData);
+}
+
+void getLocalData(AsyncWebServerRequest *request) {
+  String body = localBuffer.getMetricsCsv();
+  request->send(200, "text/csv", body);
 }
 
 // Função que assimila as rotas do servidor com suas funções representantes
@@ -295,6 +327,10 @@ void routing_setup() {
   server.on("/reset",HTTP_POST, postResetHandler);
   server.on("/reset", HTTP_OPTIONS, sendCrossOriginHeader);
   server.on("/info", HTTP_GET, getDispositiveInfo);
+  server.on("/extract", HTTP_GET, getLocalData);
+  server.on("/extract", HTTP_OPTIONS, sendCrossOriginHeader);
+  server.on("/clearBuffer", HTTP_POST, postClearBuffer);
+  server.on("/clearBuffer", HTTP_OPTIONS, sendCrossOriginHeader);
   server.begin();
 }
 
@@ -381,11 +417,12 @@ void loop(){
     if(isWifiConnected()){
       delay(100);
       updateLocalTime();
-      sendMetrics(temperatura, umidade);
+      sendMetrics(temperatura, umidade, false);
       digitalWrite(RED, LOW);
     }
     //caso o wifi esteja desconectado
     else{
+      sendMetrics(temperatura, umidade, true);
       logger.logMessage("C00U - Wifi desconectado!", 0);
       logger.displayError("C00U", lcd);
       digitalWrite(RED, HIGH);

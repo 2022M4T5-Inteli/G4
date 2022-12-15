@@ -13,7 +13,7 @@ import {
   IonPage,
   IonToolbar,
 } from "@ionic/react";
-import "./WifiSetup.css";
+import "./Settings.css";
 
 import { getDispositiveSettings, updateDispositiveSettings } from "../data/esp";
 

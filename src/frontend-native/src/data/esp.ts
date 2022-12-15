@@ -47,6 +47,16 @@ export async function updateWifiCredentials(ssid: string, password: string) {
   return data.data;
 }
 
+export async function clearDataBuffer() {
+  const data = await axios.post<IResponse>(`${API.API_BASE}/clearBuffer`, {});
+  return data.data;
+}
+
+export async function resetDispositive() {
+  const data = await axios.post<IResponse>(`${API.API_BASE}/reset`, {});
+  return data.data;
+}
+
 export async function updateDispositiveSettings(settings: IDispositiveSetting) {
   const data = await axios.post<IResponse>(
     `${API.API_BASE}/settings`,

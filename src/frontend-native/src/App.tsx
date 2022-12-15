@@ -23,6 +23,7 @@ import "@ionic/react/css/display.css";
 import "./theme/variables.css";
 import WifiSetup from "./pages/WifiSetup";
 import SettingsSetup from "./pages/Settings";
+import Extract from "./pages/Extract";
 
 setupIonicReact();
 
@@ -41,6 +42,9 @@ const App: React.FC = () => (
         </Route>
         <Route path="/general-settings" exact={true}>
           <SettingsSetup />
+        </Route>
+        <Route path="/extract" exact={true}>
+          <Extract />
         </Route>
       </IonRouterOutlet>
     </IonReactRouter>

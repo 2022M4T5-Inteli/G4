@@ -98,10 +98,7 @@ const Home: React.FC = () => {
               <IonIcon slot="start" icon={settings}></IonIcon>
               <IonText>Configurações Gerais</IonText>
             </IonButton>
-            <IonButton
-              className="navigation-button"
-              routerLink="/wifi-settings"
-            >
+            <IonButton className="navigation-button" routerLink="/extract">
               <IonIcon slot="start" icon={albums}></IonIcon>
               <IonText>Extração Manual</IonText>
             </IonButton>

@@ -31,6 +31,9 @@ HTTPClient essa biblioteca fornece uma API para as solicitações HTTP serem cri
 // Classe para salvar dados de temperatura e umidade localmente
 #include "Buffer.h"
 
+// Biblioteca para controle de Buzzer
+#include "BuzzerController.h"
+
 // Bibliotecas para webserver
 #include <Uri.h>
 #include <AsyncTCP.h>
@@ -88,6 +91,8 @@ ESPRequest esp_request;
 // preferências
 Preferences preferences;
 
+// Buzzer
+BuzzerController Buzzer(BUZZER);
 // Variáveis de configuração ------------------------------------------------
 // Servidor remoto
 String serverName = "https://keepgrowing-api.fly.dev";
@@ -145,7 +150,7 @@ void sendMetrics(float temperature, float humidity, bool offline) {
       
       if(statusCode != 200) {
         logger.logMessage("C01U - Erro ao se comunicar com o servidor remoto!", 0);
-        logger.displayError("C01U", lcd);
+        logger.displayMessage("C01U", lcd);
       }
       logger.logMessage("Requisição efetuada!", -1);
     }
@@ -349,6 +354,7 @@ void runHandler() {
 
     if(preferences.getBool("registered") == false) {
       String mac = WiFi.macAddress();
+      logger.displayMessage("Registrando...", lcd);
       bool isRegistred = registerDispositive(mac, preferences.getString("dispositiveName", "sem-nome-" + mac));
     }
 
@@ -363,12 +369,15 @@ void runHandler() {
 void checkSensorIntegrity(float temperatura, float umidade) {
   if(temperatura == NULL || temperatura == 0.0 || umidade == NULL || umidade == 0.0) {
     logger.logMessage("H00U - Dados do sensor inválidos! Temperatura e/ou umidade nulos.", 0);
-    logger.displayError("H00U", lcd);
+    logger.displayMessage("H00U", lcd);
   }
 }
 
 void setup(){
   Serial.begin(115200);
+
+  Buzzer.playInicializationSound();
+
   //setup dos leds
   pinMode(RED_RGB, OUTPUT);
   pinMode(GREEN_RGB, OUTPUT);
@@ -387,6 +396,8 @@ void setup(){
   runHandler();
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer1.c_str(), ntpServer2.c_str());
 
+
+  Buzzer.playSuccessSound();
 
   delay(500);
 }
@@ -424,8 +435,9 @@ void loop(){
     else{
       sendMetrics(temperatura, umidade, true);
       logger.logMessage("C00U - Wifi desconectado!", 0);
-      logger.displayError("C00U", lcd);
+      logger.displayMessage("C00U", lcd);
       digitalWrite(RED, HIGH);
+      WiFi.reconnect();
     }
     lastTime = millis();
   }
@@ -440,7 +452,6 @@ void loop(){
     digitalWrite(RED_RGB, LOW);
     digitalWrite(GREEN_RGB, HIGH);
     digitalWrite(BLUE_RGB, LOW);
-    noTone(8);
     delay(500);
   }
   
@@ -448,7 +459,9 @@ void loop(){
     digitalWrite(RED_RGB, HIGH);
     digitalWrite(GREEN_RGB, LOW);
     digitalWrite(BLUE_RGB, LOW);
-    tone(8, 2000);
+    if(preferences.getBool("registered") == true) {
+      Buzzer.playAlert();
+    }
     delay(500);
   }
   delay(1000);

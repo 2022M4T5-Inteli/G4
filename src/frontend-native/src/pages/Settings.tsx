@@ -7,17 +7,24 @@ import {
   IonCard,
   IonContent,
   IonHeader,
+  IonIcon,
   IonInput,
   IonItem,
   IonLabel,
   IonPage,
+  IonText,
   IonToolbar,
+  useIonAlert,
 } from "@ionic/react";
 import "./Settings.css";
+
+import { checkmark } from "ionicons/icons";
 
 import { getDispositiveSettings, updateDispositiveSettings } from "../data/esp";
 
 function SettingsSetup() {
+  const [presentAlert] = useIonAlert();
+
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
 
@@ -65,6 +72,26 @@ function SettingsSetup() {
     loadDispositiveSettings();
   }, []);
 
+  const confirmAlert = async () => {
+    presentAlert({
+      header: "Confirmar alterações?",
+      cssClass: "custom-alert",
+      buttons: [
+        {
+          text: "Cancelar",
+          role: "cancel",
+        },
+        {
+          text: "Sim",
+          role: "confirm",
+          handler: () => {
+            saveSettingsHandler();
+          },
+        },
+      ],
+    });
+  };
+
   return (
     <IonPage>
       <IonHeader translucent>
@@ -80,7 +107,7 @@ function SettingsSetup() {
 
       <IonContent fullscreen>
         <IonCard>
-          <img alt="Silhouette of mountains" src="/assets/wifi-card.png" />
+          <img alt="Silhouette of mountains" src="/assets/settings-card.png" />
         </IonCard>
         <IonItem>
           <IonLabel position="floating">Servidor remoto (API):</IonLabel>
@@ -160,13 +187,15 @@ function SettingsSetup() {
           ></IonInput>
         </IonItem>
 
-        <IonButton onClick={saveSettingsHandler}>Salvar Informações</IonButton>
+        <IonButton className="navigation-button" onClick={confirmAlert}>
+          <IonIcon slot="start" icon={checkmark}></IonIcon>
+          <IonText>Salvar Configurações</IonText>
+        </IonButton>
 
         <IonAlert
           isOpen={showAlert}
           onDidDismiss={() => setShowAlert(false)}
           header="Status"
-          // subHeader="Important message"
           message={alertMessage}
           buttons={["OK"]}
         />

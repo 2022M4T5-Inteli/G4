@@ -1,6 +1,11 @@
 import { useState } from "react";
-import { getDispositiveInfo, IDispositiveInfo } from "../data/esp";
 import {
+  getDispositiveInfo,
+  IDispositiveInfo,
+  resetDispositive,
+} from "../data/esp";
+import {
+  IonAlert,
   IonButton,
   IonCard,
   IonCardContent,
@@ -14,11 +19,30 @@ import {
   IonIcon,
   IonPage,
   IonText,
+  useIonAlert,
 } from "@ionic/react";
 import "./Home.css";
-import { wifi, refresh, settings, alertCircle, albums } from "ionicons/icons";
+import {
+  wifi,
+  refresh,
+  settings,
+  alertCircle,
+  albums,
+  link,
+} from "ionicons/icons";
 
 const Home: React.FC = () => {
+  const [presentAlert] = useIonAlert();
+
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+
+  const resetDispositiveHandler = async () => {
+    const response = await resetDispositive();
+    setAlertMessage(response.message);
+    setShowAlert(true);
+  };
+
   const [dispositiveInfo, setDispositiveInfo] = useState({
     data: {
       dispositiveId: "",
@@ -35,12 +59,36 @@ const Home: React.FC = () => {
         dispositiveId: "",
         connected: false,
         mac: "",
-        apIp: "",
+        apIp: "123",
         networkIp: "",
       },
     });
     const data = await getDispositiveInfo();
     setDispositiveInfo(data);
+  };
+
+  const resetAlert = async () => {
+    presentAlert({
+      header: "Tem certeza de que deseja resetar o dispositivo?",
+      message: " Todas as configurações serão apagadas!",
+      cssClass: "custom-alert",
+      buttons: [
+        {
+          text: "Não",
+          cssClass: "alert-button-cancel",
+          handler: () => {
+            console.log("Cancelado!");
+          },
+        },
+        {
+          text: "Sim",
+          cssClass: "alert-button-confirm",
+          handler: () => {
+            resetDispositiveHandler();
+          },
+        },
+      ],
+    });
   };
 
   return (
@@ -102,7 +150,7 @@ const Home: React.FC = () => {
               <IonIcon slot="start" icon={albums}></IonIcon>
               <IonText>Extração Manual</IonText>
             </IonButton>
-            <IonButton className="navigation-button">
+            <IonButton className="navigation-button" onClick={resetAlert}>
               <IonIcon slot="start" icon={alertCircle}></IonIcon>
               <IonText>Resetar padrões de fábrica</IonText>
             </IonButton>
@@ -113,11 +161,19 @@ const Home: React.FC = () => {
               className="navigation-button"
               onClick={reloadButtonHandler}
             >
-              <IonIcon slot="start" icon={alertCircle}></IonIcon>
+              <IonIcon slot="start" icon={link}></IonIcon>
               <IonText>Sincronizar dispositivo</IonText>
             </IonButton>
           </>
         )}
+
+        <IonAlert
+          isOpen={showAlert}
+          onDidDismiss={() => setShowAlert(false)}
+          header="Status"
+          message={alertMessage}
+          buttons={["OK"]}
+        />
       </IonContent>
       <IonFooter className="content-footer">
         <IonFabButton onClick={reloadButtonHandler}>

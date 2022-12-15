@@ -5,33 +5,18 @@ import {
   IonButton,
   IonButtons,
   IonCard,
-  IonCardContent,
-  IonCardHeader,
-  IonCardSubtitle,
-  IonCardTitle,
   IonContent,
   IonHeader,
   IonIcon,
-  IonInput,
-  IonItem,
-  IonLabel,
-  IonList,
-  IonModal,
-  IonNote,
   IonPage,
-  IonRefresher,
-  IonRefresherContent,
   IonText,
-  IonTitle,
   IonToolbar,
-  useIonViewWillEnter,
 } from "@ionic/react";
-import { useParams } from "react-router";
 import "./Extract.css";
 
 import { clearDataBuffer } from "../data/esp";
 
-import { wifi, refresh, settings, alertCircle, albums } from "ionicons/icons";
+import { cloudDownload, trashBin } from "ionicons/icons";
 import { API_BASE } from "../constants";
 
 function Extract() {
@@ -65,7 +50,7 @@ function Extract() {
 
       <IonContent fullscreen>
         <IonCard>
-          <img alt="Silhouette of mountains" src="/assets/wifi-card.png" />
+          <img alt="Silhouette of mountains" src="/assets/backup-card.png" />
         </IonCard>
         <IonButton
           className="navigation-button"
@@ -73,12 +58,12 @@ function Extract() {
           target="_blank"
           href={`${API_BASE}/extract`}
         >
-          <IonIcon slot="start" icon={wifi}></IonIcon>
+          <IonIcon slot="start" icon={cloudDownload}></IonIcon>
           <IonText>Baixar CSV</IonText>
         </IonButton>
 
         <IonButton className="navigation-button" onClick={clearBufferHandler}>
-          <IonIcon slot="start" icon={wifi}></IonIcon>
+          <IonIcon slot="start" icon={trashBin}></IonIcon>
           <IonText>Limpar dados locais</IonText>
         </IonButton>
 

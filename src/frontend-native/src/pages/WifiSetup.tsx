@@ -7,17 +7,24 @@ import {
   IonCard,
   IonContent,
   IonHeader,
+  IonIcon,
   IonInput,
   IonItem,
   IonLabel,
   IonPage,
+  IonText,
   IonToolbar,
+  useIonAlert,
 } from "@ionic/react";
 import "./WifiSetup.css";
 
 import { updateWifiCredentials } from "../data/esp";
 
+import { checkmark } from "ionicons/icons";
+
 function WifiSetup() {
+  const [presentAlert] = useIonAlert();
+
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [ssid, setSsid] = useState("");
@@ -27,6 +34,27 @@ function WifiSetup() {
     const response = await updateWifiCredentials(ssid, password);
     setAlertMessage(response.message);
     setShowAlert(true);
+  };
+
+  const confirmAlert = async () => {
+    presentAlert({
+      header: "Confirmar alterações?",
+
+      buttons: [
+        {
+          text: "Cancelar",
+          role: "cancel",
+        },
+        {
+          text: "Sim",
+          role: "confirm",
+
+          handler: () => {
+            saveWifiHandler();
+          },
+        },
+      ],
+    });
   };
   return (
     <IonPage>
@@ -61,13 +89,15 @@ function WifiSetup() {
             onIonChange={(e: any) => setPassword(e.target.value)}
           ></IonInput>
         </IonItem>
-        <IonButton onClick={saveWifiHandler}>Salvar Informações</IonButton>
+        <IonButton className="navigation-button" onClick={confirmAlert}>
+          <IonIcon slot="start" icon={checkmark}></IonIcon>
+          <IonText>Salvar Informações</IonText>
+        </IonButton>
 
         <IonAlert
           isOpen={showAlert}
           onDidDismiss={() => setShowAlert(false)}
           header="Status"
-          // subHeader="Important message"
           message={alertMessage}
           buttons={["OK"]}
         />

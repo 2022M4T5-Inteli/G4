@@ -4,9 +4,13 @@
 // Variável para controle de estado de conexão wifi
 bool connected = false;
 
+ApoloError displayLogger;
+LiquidCrystal_I2C lcd2(0x27, 16, 2);
+
 // Função que conecta o dispositivo à uma rede wifi
 void connectWifi(const char* ssid,const char* password) {
   int tryAttempts = 0;
+  displayLogger.displayMessage("Conectando...", lcd2);
   Serial.print("Attempting to connect to SSID: ");
   Serial.println(ssid);
   WiFi.begin(ssid, password);
@@ -16,6 +20,7 @@ void connectWifi(const char* ssid,const char* password) {
     Serial.print(".");
     delay(1000);
     tryAttempts++;
+    displayLogger.displayMessage("Tentativa " + String(tryAttempts), lcd2);
     Serial.print("[x] Falha ao conectar ao wifi. Tentativa ");
     Serial.println(tryAttempts);
   }

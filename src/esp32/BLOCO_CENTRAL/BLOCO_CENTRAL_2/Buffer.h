@@ -45,8 +45,7 @@ public:
       clearBuffer();
       entryCount++;
     }
-    // logger.logMessage(String(entryCount), -1);
-    // logger.logMessage(String(maxBufferEntries), -1);
+    
     logger.logMessage(String(entryCount),-1);
     if(entryCount >= maxBufferEntries) {
       logger.logMessage("Buffer Cheio! Nenhuma informação de temperature e/ou umidade será guardada.", 0);

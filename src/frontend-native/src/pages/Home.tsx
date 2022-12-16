@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   getDispositiveInfo,
   IDispositiveInfo,
@@ -31,7 +31,46 @@ import {
   link,
 } from "ionicons/icons";
 
+import { Capacitor } from "@capacitor/core";
+
+import { AndroidPermissions } from "@awesome-cordova-plugins/android-permissions";
+
 const Home: React.FC = () => {
+  function requestInternetPermission() {
+    if (Capacitor.isNativePlatform()) {
+      AndroidPermissions.checkPermission(
+        AndroidPermissions.PERMISSION.INTERNET
+      ).then((result) => {
+        if (result.hasPermission) {
+        } else {
+          //alert('please implement permission request')
+          AndroidPermissions.requestPermission(
+            AndroidPermissions.PERMISSION.INTERNET
+          );
+        }
+      });
+    } else {
+      console.log("Capacitor not detected, this button will do nothing :(");
+    }
+
+
+    if (Capacitor.isNativePlatform()) {
+      AndroidPermissions.checkPermission(
+        AndroidPermissions.PERMISSION.ACCESS_NETWORK_STATE
+      ).then((result) => {
+        if (result.hasPermission) {
+        } else {
+          //alert('please implement permission request')
+          AndroidPermissions.requestPermission(
+            AndroidPermissions.PERMISSION.ACCESS_NETWORK_STATE
+          );
+        }
+      });
+    } else {
+      console.log("Capacitor not detected, this button will do nothing :(");
+    }
+  }
+
   const [presentAlert] = useIonAlert();
 
   const [showAlert, setShowAlert] = useState(false);
@@ -54,12 +93,13 @@ const Home: React.FC = () => {
   });
 
   const reloadButtonHandler = async () => {
+    requestInternetPermission();
     setDispositiveInfo({
       data: {
         dispositiveId: "",
         connected: false,
         mac: "",
-        apIp: "123",
+        apIp: "",
         networkIp: "",
       },
     });

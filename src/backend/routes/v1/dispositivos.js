@@ -99,7 +99,6 @@ router.post("/edit", async (request, response) => {
     response.statusCode = 200;
     return response.json({
       message: "Dispositivo editado com sucesso",
-      data: updateDispositivo,
       error: false,
     });
   }

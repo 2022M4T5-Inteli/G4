@@ -3,10 +3,10 @@ class MetricsStorage {
 private:
   ApoloError logger;
 
-  void saveToBuffer(int entryCount, float temperature, float humidity, String datetime) {
+  void saveToBuffer(int entryCount, float temperature, float humidity, int tempStatus, int humStatus, String datetime) {
     entryCount++;
     String bufferEntries = bufferPreference.getString("bufferEntries", "");
-    bufferEntries = bufferEntries + String(temperature) + "," + String(humidity) + "," + "\"" + datetime + "\"\n";
+    bufferEntries = bufferEntries + String(temperature) + "," + String(humidity) + "," + String(tempStatus) + "," + String(humStatus) + "," + "\"" + datetime + "\"\n";
     bufferPreference.putString("bufferEntries", bufferEntries);
     bufferPreference.putString("bufferColumns", columns + "\n");
     bufferPreference.putUInt("entryCounter", entryCount);
@@ -38,7 +38,7 @@ public:
     logger.logMessage(bufferPreference.getString("bufferEntries", ""), -1);
   }
 
-  void processMetric(float temperature, float humidity, String datetime) {
+  void processMetric(float temperature, float humidity, int tempStatus, int humStatus, String datetime) {
     int entryCount = bufferPreference.getUInt("entryCounter", -1);
     if(entryCount < 0) {
       logger.logMessage("Nenhuma contagem de entradas encontradas no buffer.\nResetando todas as informações por segurança!", -1);
@@ -50,7 +50,7 @@ public:
     if(entryCount >= maxBufferEntries) {
       logger.logMessage("Buffer Cheio! Nenhuma informação de temperature e/ou umidade será guardada.", 0);
     } else {
-      saveToBuffer(entryCount, temperature, humidity, datetime);
+      saveToBuffer(entryCount, temperature, humidity, tempStatus, humStatus, datetime);
     }
 
     logBuffer();

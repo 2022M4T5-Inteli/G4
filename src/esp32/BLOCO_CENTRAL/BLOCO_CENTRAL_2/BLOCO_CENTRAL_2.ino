@@ -34,6 +34,9 @@ HTTPClient essa biblioteca fornece uma API para as solicitações HTTP serem cri
 // Biblioteca para controle de Buzzer
 #include "BuzzerController.h"
 
+// Biblioteca para controle de regras de temperatura e umidade
+#include "Rules.h"
+
 // Bibliotecas para webserver
 #include <Uri.h>
 #include <AsyncTCP.h>
@@ -114,9 +117,13 @@ float maxHumidity = 90.25;
 
 // Registro de informações locais
 const int MAX_BUFFER_ENTRIES = 1440;
-String COLUMN_NAMES = "temp,hum,date";
+String COLUMN_NAMES = "temp,hum,temp_status,hum_status,date";
 
 MetricsStorage localBuffer(preferences, MAX_BUFFER_ENTRIES, COLUMN_NAMES);
+
+
+// Regra de Métricas
+MetricRules metricRules(tempMin, tempMax, tempHigh, tempExtreme, minHumidity, maxHumidity);
 
 // Funções Auxiliares -------------------------------------------------------------
 
@@ -137,13 +144,16 @@ void updateLocalTime()
 }
 
 void sendMetrics(float temperature, float humidity, bool offline) {
+  int tempStatus = metricRules.getTemperatureStatus(temperature);
+  int humStatus = metricRules.getHumidityStatus(humidity);
+  
   if(preferences.getBool("registered") == true){
     if(offline) {
       logger.logMessage("Salvando dados localmente!", 2);
-      localBuffer.processMetric(temperature, humidity, formattedTime);    
+      localBuffer.processMetric(temperature, humidity, tempStatus, humStatus, formattedTime);    
     } else {
       int statusCode;
-      String payload = "{\"dispositivoId\": \"" + String(dispositiveId) + "\", \"temperatura\":"+ String(temperature) +",\"umidade\":"+ String(humidity) + ",\"datetime\": \"" + formattedTime +".0Z\"}";
+      String payload = "{\"dispositivoId\": \"" + String(dispositiveId) + "\", \"temperatura\":"+ String(temperature) +",\"umidade\":"+ String(humidity) + ",\"temperaturaStatus\":" + String(tempStatus) + ", \"umidadeStatus\":" + String(humStatus) + ", \"datetime\": \"" + formattedTime +".0Z\"}";
       Serial.println("[+] Enviando Métricas ao servidor!");
       Serial.println(payload);
       statusCode = esp_request.makePostRequest(String(serverName) + "/medidas/add", payload);
@@ -180,6 +190,14 @@ void loadSettings() {
 
   minHumidity = preferences.getFloat("minHumidity",66.5);  
   maxHumidity = preferences.getFloat("maxHumidity",90.25); 
+
+  metricRules.tempMin = tempMin;
+  metricRules.tempMax = tempMax;
+  metricRules.tempHigh = tempHigh;
+  metricRules.tempExtreme = tempExtreme;
+
+  metricRules.minHumidity = minHumidity;
+  metricRules.maxHumidity = maxHumidity;
 }
 
 void updateSettings(String newServerName, String newNtpServer1, String newNtpServer2, float newTempMin, float newTempMax, float newTempHigh, float newTempExtreme, float newMinHumidity, float newMaxHumidity) {
@@ -448,7 +466,7 @@ void loop(){
   checkSensorIntegrity(temperatura, umidade);
 
   //definindo se caso a temperatura não esteja entre o intervalo que a estufa precise ligue o led vermelho, caso esteja dentro das condiçoes vai ligar o led verde.
-  if (tempMin <= temp.temperature && temp.temperature <= tempMax) {
+  if (tempMin <= temp.temperature && temp.temperature <= tempMax || tempMin > temp.temperature ) {
     digitalWrite(RED_RGB, LOW);
     digitalWrite(GREEN_RGB, HIGH);
     digitalWrite(BLUE_RGB, LOW);

@@ -39,6 +39,8 @@ router.post("/add", async (request, response) => {
   const medidasTemperatura = request.body.temperatura;
   const medidasUmidade = request.body.umidade;
   const medidasDatetime = request.body.datetime;
+  const temperaturaStatus = request.body.temperaturaStatus;
+  const umidadeStatus = request.body.umidadeStatus;
   try {
     // cria a medida
     const medidas = await prisma.medidas.create({
@@ -50,8 +52,7 @@ router.post("/add", async (request, response) => {
       },
     });
 
-    const validator = new MetricValidator(medidasTemperatura, medidasUmidade);
-    const statusList = validator.verifyRules();
+    const statusList = [temperaturaStatus, umidadeStatus];
 
     for (const statusCode of statusList) {
       const notificacao = new Notificacao(

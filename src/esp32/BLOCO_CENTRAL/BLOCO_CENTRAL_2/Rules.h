@@ -1,3 +1,4 @@
+//Definição dos status de temperatura e umidade
 #define NORMAL -1
 #define LOW_TEMPERATURE_STATUS 0
 #define HIGH_TEMP_LEVEL_ONE 1
@@ -6,8 +7,9 @@
 #define LOW_HUMIDITY_STATUS 4
 #define HIGH_HUMIDITY_STATUS 5
 
+//Cria uma classe com as regras das medidas
 class MetricRules {
-  public:
+  public: //Define escalas de temperatura e umidade
     float tempMin;
     float tempMax;
     float tempHigh;
@@ -15,6 +17,7 @@ class MetricRules {
     float minHumidity;
     float maxHumidity;
 
+    //Define quais os valores das escalas de temperatura e umidade a partir de inputs
     MetricRules(float tempMinInput, float tempMaxInput, float tempHighInput, float tempExtremeInput, float minHumidityInput, float maxHumidityInput) {
       tempMin = tempMinInput;
       tempMax = tempMaxInput;
@@ -23,7 +26,7 @@ class MetricRules {
       minHumidity = minHumidityInput;
       maxHumidity = maxHumidityInput;
     }
-    int getTemperatureStatus(float temperature) {
+    int getTemperatureStatus(float temperature) { //Função que retorna qual o status de temperatura, a partir do valor da variável temperature
       if (temperature < tempMin) {
       return LOW_TEMPERATURE_STATUS;
       }
@@ -43,7 +46,7 @@ class MetricRules {
       return NORMAL;
     }
 
-    int getHumidityStatus(float humidity) {
+    int getHumidityStatus(float humidity) {//Função que retorna qual o status de umidade, a partir do valor da variável humidity
       if (humidity < minHumidity) {
         return LOW_HUMIDITY_STATUS;
       }

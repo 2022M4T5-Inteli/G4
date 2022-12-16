@@ -365,7 +365,7 @@ void runHandler() {
   initPreferencesReadWrite();
   loadSettings();
 
-  createWifiAp("teste-esp32-esp", "password123");
+  createWifiAp("esp32-ap-config", "gerdau1234");
   if(preferences.getBool("wifi-configured") == true) {
     connectWifi(preferences.getString("client_ssid").c_str(), preferences.getString("client_password").c_str());
     esp_request.setupHttp();
@@ -466,7 +466,7 @@ void loop(){
   checkSensorIntegrity(temperatura, umidade);
 
   //definindo se caso a temperatura não esteja entre o intervalo que a estufa precise ligue o led vermelho, caso esteja dentro das condiçoes vai ligar o led verde.
-  if (tempMin <= temp.temperature && temp.temperature <= tempMax || tempMin > temp.temperature ) {
+  if (tempMin <= temp.temperature && temp.temperature <= tempMax) {
     digitalWrite(RED_RGB, LOW);
     digitalWrite(GREEN_RGB, HIGH);
     digitalWrite(BLUE_RGB, LOW);

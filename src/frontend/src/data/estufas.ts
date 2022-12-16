@@ -21,11 +21,31 @@ export interface IDispositivosResponse {
   data: IDispositivoDetailed[];
 }
 
+export interface IDefaultResponse {
+  message: string;
+  error: boolean;
+}
+
 export async function listDispositivosDetailed() {
   const data = await axios.get<IDispositivosResponse>(
     `${API.DISPOSITIVO_ENDPOINT}/list/detailed`
   );
   return data.data;
+}
+
+export async function updateEstufaName(
+  dispositivoId: number | string,
+  dispositivoName: string
+) {
+  const response = await axios.post<IDefaultResponse>(
+    `${API.DISPOSITIVO_ENDPOINT}/edit`,
+    {
+      id: dispositivoId,
+      nome: dispositivoName,
+    }
+  );
+
+  return response.data;
 }
 
 export interface Estufa {

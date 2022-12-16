@@ -17,6 +17,8 @@ model Dispositivo {
   estufa      String
   Medidas     Medidas[]
   Notificacao Notificacao[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }
 
 model Medidas {
@@ -37,4 +39,6 @@ model Notificacao {
   gatilhoId     Int
   tipo          Int
   status        Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }

@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
-
+  getDispositiveInfo,
+  IDispositiveInfo,
+  resetDispositive,
 } from "../data/esp";
 import {
-  IonBadge,
+  IonAlert,
   IonButton,
-  IonButtons,
   IonCard,
   IonCardContent,
   IonCardHeader,
@@ -16,21 +17,120 @@ import {
   IonFooter,
   IonHeader,
   IonIcon,
-  IonImg,
-  IonList,
   IonPage,
-  IonRefresher,
-  IonRefresherContent,
   IonText,
-  IonTitle,
-  IonToolbar,
-  useIonViewWillEnter,
+  useIonAlert,
 } from "@ionic/react";
 import "./Home.css";
-import { wifi, refresh, settings, alertCircle, albums} from "ionicons/icons";
-import EstufaListItem from "../components/EstufaListItem";
+import {
+  wifi,
+  refresh,
+  settings,
+  alertCircle,
+  albums,
+  link,
+} from "ionicons/icons";
+
+import { Capacitor } from "@capacitor/core";
+
+import { AndroidPermissions } from "@awesome-cordova-plugins/android-permissions";
 
 const Home: React.FC = () => {
+  function requestInternetPermission() {
+    if (Capacitor.isNativePlatform()) {
+      AndroidPermissions.checkPermission(
+        AndroidPermissions.PERMISSION.INTERNET
+      ).then((result) => {
+        if (result.hasPermission) {
+        } else {
+          //alert('please implement permission request')
+          AndroidPermissions.requestPermission(
+            AndroidPermissions.PERMISSION.INTERNET
+          );
+        }
+      });
+    } else {
+      console.log("Capacitor not detected, this button will do nothing :(");
+    }
+
+
+    if (Capacitor.isNativePlatform()) {
+      AndroidPermissions.checkPermission(
+        AndroidPermissions.PERMISSION.ACCESS_NETWORK_STATE
+      ).then((result) => {
+        if (result.hasPermission) {
+        } else {
+          //alert('please implement permission request')
+          AndroidPermissions.requestPermission(
+            AndroidPermissions.PERMISSION.ACCESS_NETWORK_STATE
+          );
+        }
+      });
+    } else {
+      console.log("Capacitor not detected, this button will do nothing :(");
+    }
+  }
+
+  const [presentAlert] = useIonAlert();
+
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+
+  const resetDispositiveHandler = async () => {
+    const response = await resetDispositive();
+    setAlertMessage(response.message);
+    setShowAlert(true);
+  };
+
+  const [dispositiveInfo, setDispositiveInfo] = useState({
+    data: {
+      dispositiveId: "",
+      connected: false,
+      mac: "",
+      apIp: "",
+      networkIp: "",
+    },
+  });
+
+  const reloadButtonHandler = async () => {
+    requestInternetPermission();
+    setDispositiveInfo({
+      data: {
+        dispositiveId: "",
+        connected: false,
+        mac: "",
+        apIp: "",
+        networkIp: "",
+      },
+    });
+    const data = await getDispositiveInfo();
+    setDispositiveInfo(data);
+  };
+
+  const resetAlert = async () => {
+    presentAlert({
+      header: "Tem certeza de que deseja resetar o dispositivo?",
+      message: " Todas as configurações serão apagadas!",
+      cssClass: "custom-alert",
+      buttons: [
+        {
+          text: "Não",
+          cssClass: "alert-button-cancel",
+          handler: () => {
+            console.log("Cancelado!");
+          },
+        },
+        {
+          text: "Sim",
+          cssClass: "alert-button-confirm",
+          handler: () => {
+            resetDispositiveHandler();
+          },
+        },
+      ],
+    });
+  };
+
   return (
     <IonPage id="home-page">
       <IonHeader></IonHeader>
@@ -47,38 +147,76 @@ const Home: React.FC = () => {
 
           <IonCardContent>
             <IonText>
-              <b>Status da conexão:</b> <p> Desconectado</p>
+              <p>
+                <b>Id do dispositivo: {dispositiveInfo.data.dispositiveId}</b>
+              </p>
+              <b>Status da conexão:</b>{" "}
+              <p>
+                {dispositiveInfo.data.connected ? "Conectado" : "Desconectado"}
+              </p>
             </IonText>
             <IonText>
-              <b>Endereço de conexão:</b> <p>-</p>
+              <b>Ip de conexão local:</b>{" "}
+              <p>{dispositiveInfo.data.networkIp}</p>
             </IonText>
             <IonText>
-              <b>Mac:</b> <p>Desconectado</p>
+              <b>Mac:</b> <p>{dispositiveInfo.data.mac}</p>
             </IonText>
             <IonText>
-              <b>Ip de configuração padrão:</b> <p>192.168.4.1</p>
+              <b>Ip de conexão do Hotspost (AP):</b>{" "}
+              <p>{dispositiveInfo.data.apIp}</p>
             </IonText>
           </IonCardContent>
         </IonCard>
-        <IonButton className="navigation-button" routerLink="/wifi-settings">
-          <IonIcon slot="start" icon={wifi}></IonIcon>
-          <IonText>Configurar WiFi</IonText>
-        </IonButton>
-        <IonButton className="navigation-button" routerLink="/wifi-settings">
-          <IonIcon slot="start" icon={settings}></IonIcon>
-          <IonText>Configurações Gerais</IonText>
-        </IonButton>
-        <IonButton className="navigation-button" routerLink="/wifi-settings">
-          <IonIcon slot="start" icon={albums}></IonIcon>
-          <IonText>Extração Manual</IonText>
-        </IonButton>        
-        <IonButton className="navigation-button">
-          <IonIcon slot="start" icon={alertCircle}></IonIcon>
-          <IonText>Resetar padrões de fábrica</IonText>
-        </IonButton>
+
+        {dispositiveInfo.data.apIp ? (
+          <>
+            {" "}
+            <IonButton
+              className="navigation-button"
+              routerLink="/wifi-settings"
+            >
+              <IonIcon slot="start" icon={wifi}></IonIcon>
+              <IonText>Configurar WiFi</IonText>
+            </IonButton>
+            <IonButton
+              className="navigation-button"
+              routerLink="/general-settings"
+            >
+              <IonIcon slot="start" icon={settings}></IonIcon>
+              <IonText>Configurações Gerais</IonText>
+            </IonButton>
+            <IonButton className="navigation-button" routerLink="/extract">
+              <IonIcon slot="start" icon={albums}></IonIcon>
+              <IonText>Extração Manual</IonText>
+            </IonButton>
+            <IonButton className="navigation-button" onClick={resetAlert}>
+              <IonIcon slot="start" icon={alertCircle}></IonIcon>
+              <IonText>Resetar padrões de fábrica</IonText>
+            </IonButton>
+          </>
+        ) : (
+          <>
+            <IonButton
+              className="navigation-button"
+              onClick={reloadButtonHandler}
+            >
+              <IonIcon slot="start" icon={link}></IonIcon>
+              <IonText>Sincronizar dispositivo</IonText>
+            </IonButton>
+          </>
+        )}
+
+        <IonAlert
+          isOpen={showAlert}
+          onDidDismiss={() => setShowAlert(false)}
+          header="Status"
+          message={alertMessage}
+          buttons={["OK"]}
+        />
       </IonContent>
       <IonFooter className="content-footer">
-        <IonFabButton>
+        <IonFabButton onClick={reloadButtonHandler}>
           <IonIcon icon={refresh}></IonIcon>
         </IonFabButton>
       </IonFooter>

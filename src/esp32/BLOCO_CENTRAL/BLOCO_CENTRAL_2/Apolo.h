@@ -36,7 +36,7 @@ class ApoloError {
 
     // Método que exibe um código de erro em um display lcd definido na chamada
     // da função
-    void displayError(String errorCode, LiquidCrystal_I2C lcd) {
+    void displayMessage(String errorCode, LiquidCrystal_I2C lcd) {
       lcd.clear();
       lcd.setCursor(0,0);
       lcd.print(errorCode);

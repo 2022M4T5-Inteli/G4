@@ -8,6 +8,7 @@ import {
   IonText,
   IonButton,
   IonIcon,
+  useIonAlert,
 } from "@ionic/react";
 import React from "react";
 //importando o css
@@ -30,6 +31,30 @@ const CardNotificacao: React.FC<CardNotificacaoInputs> = ({
   aviso,
   onclickHandler,
 }) => {
+  const [presentAlert] = useIonAlert();
+
+  const confirmAction = async () => {
+    presentAlert({
+      header: "Dispensar alerta?",
+      message:
+        "Alertas deste tipo só ocorrerão após 30 minutos a partir do momento de dispensa.",
+      buttons: [
+        {
+          text: "Cancelar",
+          role: "cancel",
+        },
+        {
+          text: "Sim",
+          role: "confirm",
+
+          handler: () => {
+            onclickHandler();
+          },
+        },
+      ],
+    });
+  };
+
   return (
     //criando o card de notificação
     <IonCard>
@@ -46,11 +71,9 @@ const CardNotificacao: React.FC<CardNotificacaoInputs> = ({
         </div>
         <div className="botao-div">
           <IonButton
-            color="success" 
+            color="success"
             className="dispensarbutton"
-            onClick={() => {
-              onclickHandler();
-            }}
+            onClick={confirmAction}
           >
             Dispensar
             <IonIcon icon={checkmark} color={"light"} className="icon-class" />

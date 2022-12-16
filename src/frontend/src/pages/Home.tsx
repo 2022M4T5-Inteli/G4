@@ -4,6 +4,7 @@ import {
   getEstufas,
   IDispositivoDetailed,
   listDispositivosDetailed,
+  updateEstufaName,
 } from "../data/estufas";
 import {
   IonBadge,
@@ -97,9 +98,7 @@ const Home: React.FC = () => {
                 slot="end"
                 className="notificationpagebutton"
                 src="./assets/bellicon.png"
-              >
-
-              </IonImg>
+              ></IonImg>
             </IonButton>
           </IonButtons>
         </IonToolbar>
@@ -115,9 +114,14 @@ const Home: React.FC = () => {
               key={d.id}
               id={d.id}
               name={d.estufa}
-              temperature={d.Medidas[0].temperatura}
-              humidity={d.Medidas[0].umidade}
-              time={datetimeToTime(d.Medidas[0].datetime)}
+              temperature={d.Medidas[0] ? d.Medidas[0].temperatura : 0.0}
+              humidity={d.Medidas[0] ? d.Medidas[0].umidade : 0.0}
+              time={
+                d.Medidas[0]
+                  ? datetimeToTime(d.Medidas[0].datetime)
+                  : "--/--/--"
+              }
+              refreshHandler={refresh}
             />
           ))}
         </IonList>

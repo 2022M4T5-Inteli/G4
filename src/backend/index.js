@@ -6,7 +6,7 @@ const urlencodedParser = bodyParser.urlencoded({ extended: false });
 const cors = require("cors");
 const app = express();
 
-const HOSTNAME = "127.0.0.1";
+const HOSTNAME = "0.0.0.0";
 const PORT = 3000;
 
 // routers import
@@ -14,6 +14,7 @@ const PORT = 3000;
 const medidasRoute = require("./routes/v1/medidas");
 const dispositivosRoute = require("./routes/v1/dispositivos");
 const notificacaoRoute = require("./routes/v1/notificacao");
+const healthRoute = require("./routes/v1/health");
 
 // application middleware
 
@@ -25,6 +26,7 @@ app.use(express.json());
 app.use("/medidas", urlencodedParser, medidasRoute);
 app.use("/dispositivos", urlencodedParser, dispositivosRoute);
 app.use("/notificacao", urlencodedParser, notificacaoRoute);
+app.use("/health", urlencodedParser, healthRoute);
 
 // Server Application
 app.listen(PORT, HOSTNAME, () => {

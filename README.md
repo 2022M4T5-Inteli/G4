@@ -21,20 +21,18 @@
 
 ## 📁 Estrutura de pastas
 
-|--> .github <br>
-|--> documentos <br>
-  &emsp;| --> antigos <br>
-  &emsp;| Manual de Instruções Módulo 4 - Grupo 4 - V3.docx <br>
-  &emsp;| Manual de Instruções Módulo 4 - Grupo 4 - V3.pdf <br>
-  &emsp;| IoTDoc Módulo 4 - Grupo 4 - V5.docx <br>
-  &emsp;| IoTDoc Módulo 4 - Grupo 4 - V5.pdf <br>
-|--> src <br>
-  &emsp;| --> backend <br>
-  &emsp;| --> esp32 <br>
-  &emsp;| --> frontend-native <br>
-  &emsp;| --> frontend <br>
-| readme.md <br>
-| license.txt <br>
+|--> documentos<br>
+  &emsp;| --> outros <br>
+  &emsp;|--> T5_G4_V01_IoTDocument.docx<br>
+  &emsp;|--> T5_G4_V01_IoTDocument.pdf<br>
+  
+  &emsp;|--> T5_G4_V01_Manual de Instruções.docx<br>
+  &emsp;|--> T5_G4_V01_Manual de Instruções.pdf<br>
+|-->Src<br>
+  &emsp;|--> Backend<br>
+  &emsp;|--> Circuito<br>
+  &emsp;|--> Frontend<br>
+| readme.md<br>
 
 Dentre os arquivos presentes na raiz do projeto, definem-se:
 
@@ -44,8 +42,13 @@ Dentre os arquivos presentes na raiz do projeto, definem-se:
 
 - <b>src</b>: aqui estará presente todo o código fonte do projeto (subdividindo-se em 4 outras pastas: backend, esp32, frontend-native e frontend).
 
-## 💻 Execução dos projetos
-  * Para a executação do projeto, leia o Manual de Instruções localizado na pasta de documentos, ele possui manuais de montagem, instalação e configuração de todo o sistema.
+## 💻 Execução do projeto
+
+Um guia para a execução desse projeto pode ser encontrado no conteúdo do documento "Manual de Instruções", dentro da pasta "documentos".
+
+Se preferir, também é possível acessá-lo a partir do seguinte link:
+
+https://github.com/2022M4T5-Inteli/G4/blob/main/documentos/T5_G4_V1_Manual%20de%20Instru%C3%A7%C3%B5es.pdf
 
 ## 🗃 Histórico de lançamentos
   * 21/10/2022
